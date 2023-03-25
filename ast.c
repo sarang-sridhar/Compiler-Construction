@@ -48,6 +48,7 @@ struct treeNode *makeNewNode(char *name, struct treeNode *list[], int count)
 {
     struct treeNode *node = malloc(sizeof(struct treeNode));
     strcpy(node->value, name);
+    strcpy(node->tk_data.lexeme,"hello"); 
     int i;
     node->children = list[0];
     struct treeNode *temp;
@@ -567,7 +568,7 @@ void createAST(struct treeNode *root)
             }
             if (temp_child->nextSibling == NULL)
             {
-                root->addr = makemakeNewNode("ARRAY_ACCESS", children, 2);
+                root->addr = makeNewNode("ARRAY_ACCESS", children, 2);
             }
             break;
 
@@ -955,7 +956,7 @@ void createAST(struct treeNode *root)
 
         case 81:
             // top down
-            createAst(temp_child);
+            createAST(temp_child);
             // bottom up
             if (!strcmp(temp_child->value, "idList"))
             {
@@ -1402,7 +1403,7 @@ void createAST(struct treeNode *root)
                 free(freenode);
                 continue;
             }
-            else if (!strcmp(temp_child, "dataType"))
+            else if (!strcmp(temp_child->value, "dataType"))
             {
                 children[count++] = temp_child->addr;
                 root->addr = makeNewNode("DECLARE", children, 2);

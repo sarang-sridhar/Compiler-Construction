@@ -563,7 +563,7 @@ void createAST(struct treeNode *root)
             if (!strcmp(temp_child->value, "newArithmeticExpr"))
             {
                 children[count++] = temp_child->addr;
-                free(freenode)
+                free(freenode);
             }
             if (temp_child->nextSibling == NULL)
             {

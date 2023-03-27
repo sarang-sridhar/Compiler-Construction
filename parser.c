@@ -131,7 +131,8 @@ void createParseTable()
     {
         for(int j = 0; firstAndFollow[i][j] != NULL; j++)
         {
-            parseTable[get_hash(grammar[i]->value)][get_hash(firstAndFollow[i][j])] = grammar[i];
+            parseTable[get_hash(grammar[i]->value)][get_hash(firstAndFollow[i][j])].gNode = grammar[i];
+            parseTable[get_hash(grammar[i]->value)][get_hash(firstAndFollow[i][j])].ruleNo = i + 1;
         }
     }
 }
@@ -171,7 +172,7 @@ void runPDA(){
                 currExpand->line_no = global_token.line_no;
 
                 //match
-                //printf("match,%s\n",s_top->value);
+                // printf("match,%s\n",s_top->value);
                 s_pop();
                 //tree-code
 
@@ -207,10 +208,12 @@ void runPDA(){
         }
         else
         {   
-            if(parseTable[get_hash(s_top->value)][get_hash(token_strings[global_token.tk_name])] != NULL)
+            if(parseTable[get_hash(s_top->value)][get_hash(token_strings[global_token.tk_name])].gNode != NULL)
             {
                 struct node* curr;
-                curr = parseTable[get_hash(s_top->value)][get_hash(token_strings[global_token.tk_name])];
+                curr = parseTable[get_hash(s_top->value)][get_hash(token_strings[global_token.tk_name])].gNode;
+                 //setting the rule number of a non terminal
+                currExpand->ruleNo = parseTable[get_hash(s_top->value)][get_hash(token_strings[global_token.tk_name])].ruleNo;
                 s_pop();
                 //tree generation
                 if(!strcmp(currExpand->value,"EPSILON")){

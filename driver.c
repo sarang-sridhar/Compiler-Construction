@@ -9,6 +9,7 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 
 // #include "lexer.c"
 #include "parser.c"
+#include "ast.c"
 #include <time.h>
 
 void removeComments(char *name)
@@ -93,7 +94,8 @@ void print_choices()
     printf("\n 1. Print comment free code on terminal:");
     printf("\n 2. Print token list on terminal");
     printf("\n 3. Print parse tree in text file :");
-    printf("\n 4. Print total time taken by the stage 1 code: \n *********** \n");
+    printf("\n 4. Print total time taken by the stage 1 code:");
+    printf("\n 5. Print AST in text file :\n *********** \n");
 }
 
 void totalTime()
@@ -129,14 +131,17 @@ void totalTime()
     currExpand = tree_node;
 
     getnextblock(fp, buff1);
+    driverFlag2=0;
     driverFlag = 0;
     while (!driverFlag)
     {
         getNextToken();
         runPDA();
+        // if(driverFlag2)driverFlag=1;
     }
-    while (isEpsilon[get_hash(s_top->value)])
+    while (isEpsilon[get_hash(s_top->value)]){
         s_pop();
+    }
 
     if (!strcmp(s_top->value, "DOLLAR") && !errorToken)
         printf("Parsing successful \n");
@@ -161,6 +166,8 @@ void printParseTree(struct treeNode *node, FILE *outfile)
 {
     if (node == NULL || !strcmp(node->value, "EPSILON"))
     {
+        if(!strcmp(node->value, "EPSILON"))
+            fprintf(outfile, "Lexeme: ----, Line no: %d, Tk name: EPSILON, ValueIfNumber: ----, Parent: %s, isLeaf: YES, NodeSymbol: ----\n", node->line_no, node->parent->value);
         return;
     }
 
@@ -189,9 +196,9 @@ void printParseTree(struct treeNode *node, FILE *outfile)
 
     // print node
     if (node->parent != NULL)
-        fprintf(outfile, "Lexeme: ----, Line no: ----, Tk name: ----, ValueIfNumber: ----, Parent: %s, IsLeaf: NO, NodeSymbol: %s\n", node->parent->value, node->value);
+        fprintf(outfile, "RuleNo: %d, Lexeme: ----, Line no: ----, Tk name: ----, ValueIfNumber: ----, Parent: %s, IsLeaf: NO, NodeSymbol: %s\n", node->ruleNo,node->parent->value, node->value);
     else
-        fprintf(outfile, "Lexeme: ----, Line no: ----, Tk name: ----, ValueIfNumber: ----, Parent: ROOT, IsLeaf: NO, Node Symbol: %s\n", node->value);
+        fprintf(outfile, "RuleNo: %d, Lexeme: ----, Line no: ----, Tk name: ----, ValueIfNumber: ----, Parent: ROOT, IsLeaf: NO, Node Symbol: %s\n",node->ruleNo, node->value);
     // fprintf(outfile,"%s\n", node->value);
 
     // print other children
@@ -248,14 +255,19 @@ void runParser(FILE *fp2)
     currExpand = tree_node;
 
     getnextblock(fp, buff1);
+    driverFlag2=0;
     driverFlag = 0;
     while (!driverFlag)
     {
         getNextToken();
         runPDA();
+        // if(driverFlag2)driverFlag=1;
     }
-    while (isEpsilon[get_hash(s_top->value)])
+    while (isEpsilon[get_hash(s_top->value)]){
+        printf("Current Expand is:%s\n",currExpand->value);
+        currExpand->ruleNo = 7;
         s_pop();
+    }
 
     if (!strcmp(s_top->value, "DOLLAR") && !errorToken)
         printf("Parsing successful");
@@ -270,6 +282,9 @@ void runParser(FILE *fp2)
             s_pop();
         }
     }
+    //printf("%s\n",root->value);
+    createAST(root);
+    //printParseTree(root,stdout);
     fprintf(fp2, "PARSE TREE:\n");
     printParseTree(root, fp2);
     free(element);
@@ -429,6 +444,12 @@ int main(int argc, char *argv[])
             // Print both total_CPU_time and total_CPU_time_in_seconds
             printf("Total CPU Time is: %f, totoal cpu time in seconds is %f \n", total_CPU_time + t1, total_CPU_time_in_seconds + t1_in_seconds);
         }
+        break;
+        case 5:
+        createAST(root);
+        if(root == NULL) printf("DED KHATAM\n");
+        printf("%s\n",root->value);
+        printParseTree(root,stdout);
         break;
         default:
             printf("\n choose one of the given options\n");

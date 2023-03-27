@@ -16,6 +16,7 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 #define NON_TERM 70
 #define TOTAL_TERM 128
 
+//for storing grammar node
 struct node
 {
     int isTerminal;
@@ -23,6 +24,13 @@ struct node
     struct node* backward_link;
     char value[23]; // token
 }; 
+
+//stores grammar rule along with rule number
+struct ruleNode
+{
+    struct node* gNode;
+    int ruleNo;
+};
 
 //both non-terminals and terminals
 //non terminals = 70
@@ -54,7 +62,7 @@ struct node* grammar[NUM_RULES];
 //first and follow for all rules
 char* firstAndFollow[NUM_RULES][NUM_RULES];
 //parseTable
-struct node* parseTable[HASH_MOD][HASH_MOD];
+struct ruleNode parseTable[HASH_MOD][HASH_MOD];
 //comma
 const char* comma = ",";
 //errorToken
@@ -65,4 +73,5 @@ char ntFollow[HASH_MOD][300];
 int isEpsilon[HASH_MOD];
 
 int driverFlag;
+int driverFlag2;
 #endif

@@ -12,6 +12,8 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 #include<ctype.h>
 #include<stdlib.h>
 #include<string.h>
+// error ka karan ban sakta hai
+//#include "lexerDef.h"
 
 struct treeNode
 {
@@ -23,7 +25,7 @@ struct treeNode
     struct treeNode* nextSibling;
     struct treeNode* prevSibling;
     union Variant tk_data;
-    int rule_no;  
+    int ruleNo;  
     struct treeNode* inh; //inherited attribute
     struct treeNode* syn; //synthesized attribute
     struct treeNode* addr; //address attribute

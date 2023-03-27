@@ -11,6 +11,8 @@ void addChild(struct treeNode* parent, struct node* child)
 {
     struct treeNode* temp = malloc(sizeof(struct treeNode));
     strcpy(temp->value,child->value);
+    // if(!child->isTerminal)
+    //     strcpy(temp->tk_data.lexeme," "); 
     temp->isTerminal = child->isTerminal;
     temp->parent = parent;
     temp->prevSibling = NULL;

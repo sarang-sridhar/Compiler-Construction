@@ -176,22 +176,25 @@ void printParseTree(struct treeNode *node, FILE *outfile)
     //     return;
     // }
 
-    // printf("%s\n",node->value);
+    printf("\n%s\n",node->value);
 
     if (node->children == NULL)
     { // fprintf(outfile,"getlost");
       // printf("*********%s,%d,%s,-,%s,YES,%s*********\n",node->tk_data.lexeme,node->line_no,node->value,node->parent->value,node->value);
+        
         if (!strcmp(node->value, "NUM"))
             fprintf(outfile, "Lexeme: ----, Line no: %d, Tk name: %s, ValueIfNumber: %d, Parent: %s, isLeaf: YES, NodeSymbol: ----\n", node->line_no, node->value, node->tk_data.val, node->parent->value);
         else if (!strcmp(node->value, "RNUM"))
             fprintf(outfile, "Lexeme: ----, Line no: %d, Tk name: %s, ValueIfNumber: %f, Parent: %s, isLeaf: YES, NodeSymbol: ----\n", node->line_no, node->value, node->tk_data.realVal, node->parent->value);
+        else if(node->parent == NULL)
+            fprintf(outfile, "Lexeme: %s, Line no: %d, Tk_name: %s, ValueIfNumber: ----, Parent: ROOT, YES, NodeSymbol: ----\n", node->tk_data.lexeme, node->line_no, node->value);
         else
-            fprintf(outfile, "Lexeme: %s, Line no: %d, Tk_name: %s, ValueIfNumber: ----, Parent: %s, YES, NodeSymbol: ----\n", node->tk_data.lexeme, node->line_no, node->value, node->parent->value);
+            fprintf(outfile, "Lexeme: %s, Line no: %d, Tk_name: %s, ValueIfNumber: YE CASE HAI KYA, Parent: %s, YES, NodeSymbol: ----\n", node->tk_data.lexeme, node->line_no, node->value, node->parent->value);
         // printf("%s\n", node->value);
         return;
     }
-
     // print left child
+    if(node->children == NULL) printf("Root's child is null\n"); else printf("Root's child is not null\n");
     printParseTree(node->children, outfile);
 
     // print node
@@ -215,6 +218,33 @@ void printParseTree(struct treeNode *node, FILE *outfile)
         temp = temp->nextSibling;
     }
     return;
+}
+
+//prints AST in inorder traversal
+void printAST(struct treeNode* root,FILE *outfile){
+    if(root == NULL)
+        return;
+
+    printAST(root->children,outfile);
+
+    if(root->addr!=NULL)
+        printAST(root->addr,outfile);
+    else
+        fprintf(outfile,"%s\n",root->value,outfile);
+
+    if(root->children == NULL)
+        return;
+    
+    struct treeNode *temp;
+    temp = root->children->nextSibling;
+    printf("%s\n",root->children->tk_data.lexeme);
+    if(temp !=NULL) printf("temp is not null\n");
+
+    while (temp != NULL)
+    {
+        printAST(temp,outfile);
+        temp = temp->nextSibling;
+    }
 }
 
 void runParser(FILE *fp2)
@@ -284,9 +314,11 @@ void runParser(FILE *fp2)
     }
     //printf("%s\n",root->value);
     createAST(root);
+    //printf("%s",root->value);
     //printParseTree(root,stdout);
     fprintf(fp2, "PARSE TREE:\n");
-    printParseTree(root, fp2);
+    //printParseTree(root, fp2);
+    printAST(root,fp2);
     free(element);
     free(tree_node);
     return;

@@ -1,3 +1,4 @@
 <<<driver program>>>
 start
+    a := b;
 end

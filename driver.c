@@ -164,6 +164,8 @@ void totalTime()
 
 void printParseTree(struct treeNode *node, FILE *outfile)
 {
+
+    //EPSILON IS THERE IN THE PARSE TREE
     if (node == NULL || !strcmp(node->value, "EPSILON"))
     {
         if(!strcmp(node->value, "EPSILON"))
@@ -229,21 +231,35 @@ void printAST(struct treeNode* root,FILE *outfile){
 
     if(root->addr!=NULL)
         printAST(root->addr,outfile);
-    else
-        fprintf(outfile,"%s\n",root->value,outfile);
+    else{
+        // struct treeNode *temp;
+        // temp = root;
+        //while(temp!=NULL){
+            fprintf(outfile,"%s\n",root->value,outfile);
+        //     temp = temp->next;
+        // }
+    }
 
     if(root->children == NULL)
         return;
     
     struct treeNode *temp;
-    temp = root->children->nextSibling;
-    printf("%s\n",root->children->tk_data.lexeme);
-    if(temp !=NULL) printf("temp is not null\n");
-
-    while (temp != NULL)
+    temp = root->children->astnextSibling;
+    if(temp == NULL)
     {
-        printAST(temp,outfile);
-        temp = temp->nextSibling;
+        temp = root->children->nextSibling;
+        while (temp != NULL)
+        {
+            printAST(temp,outfile);
+            temp = temp->nextSibling;
+        }
+    }
+    else{
+        while (temp != NULL)
+        {
+            printAST(temp,outfile);
+            temp = temp->astnextSibling;
+        }
     }
 }
 
@@ -312,11 +328,12 @@ void runParser(FILE *fp2)
             s_pop();
         }
     }
+
     //printf("%s\n",root->value);
     createAST(root);
     //printf("%s",root->value);
     //printParseTree(root,stdout);
-    fprintf(fp2, "PARSE TREE:\n");
+    fprintf(fp2, "AST TREE:\n");
     //printParseTree(root, fp2);
     printAST(root,fp2);
     free(element);

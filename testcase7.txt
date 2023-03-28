@@ -1,4 +1,4 @@
 <<<driver program>>>
 start
-    a := b;
+    a := -(B[2]*2+c-4);
 end

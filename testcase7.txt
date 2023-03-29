@@ -1,4 +1,7 @@
+<<module test>>
+takes input [a:integer,b:real];
+start
+end
 <<<driver program>>>
 start
-    a := -(B[2]*2+c-4);
 end

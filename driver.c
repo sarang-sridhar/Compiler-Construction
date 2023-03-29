@@ -1,11 +1,10 @@
 /*
-ID: 2020A7PS0297P                             NAME: Sarang Sridhar 
-ID: 2020A7PS0995P                             NAME: Kashish Mahajan 
-ID: 2020A7PS0993P                             NAME: Satvik Sinha 
+ID: 2020A7PS0297P                             NAME: Sarang Sridhar
+ID: 2020A7PS0995P                             NAME: Kashish Mahajan
+ID: 2020A7PS0993P                             NAME: Satvik Sinha
 ID: 2020A7PS0036P                             NAME: Aarya Attrey
-ID: 2020A7PS0017P                             NAME: Urvashi Sharma 
+ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 */
-
 
 // #include "lexer.c"
 #include "parser.c"
@@ -131,7 +130,7 @@ void totalTime()
     currExpand = tree_node;
 
     getnextblock(fp, buff1);
-    driverFlag2=0;
+    driverFlag2 = 0;
     driverFlag = 0;
     while (!driverFlag)
     {
@@ -139,7 +138,8 @@ void totalTime()
         runPDA();
         // if(driverFlag2)driverFlag=1;
     }
-    while (isEpsilon[get_hash(s_top->value)]){
+    while (isEpsilon[get_hash(s_top->value)])
+    {
         s_pop();
     }
 
@@ -165,10 +165,10 @@ void totalTime()
 void printParseTree(struct treeNode *node, FILE *outfile)
 {
 
-    //EPSILON IS THERE IN THE PARSE TREE
+    // EPSILON IS THERE IN THE PARSE TREE
     if (node == NULL || !strcmp(node->value, "EPSILON"))
     {
-        if(!strcmp(node->value, "EPSILON"))
+        if (!strcmp(node->value, "EPSILON"))
             fprintf(outfile, "Lexeme: ----, Line no: %d, Tk name: EPSILON, ValueIfNumber: ----, Parent: %s, isLeaf: YES, NodeSymbol: ----\n", node->line_no, node->parent->value);
         return;
     }
@@ -178,17 +178,17 @@ void printParseTree(struct treeNode *node, FILE *outfile)
     //     return;
     // }
 
-    printf("\n%s\n",node->value);
+    printf("\n%s\n", node->value);
 
     if (node->children == NULL)
     { // fprintf(outfile,"getlost");
       // printf("*********%s,%d,%s,-,%s,YES,%s*********\n",node->tk_data.lexeme,node->line_no,node->value,node->parent->value,node->value);
-        
+
         if (!strcmp(node->value, "NUM"))
             fprintf(outfile, "Lexeme: ----, Line no: %d, Tk name: %s, ValueIfNumber: %d, Parent: %s, isLeaf: YES, NodeSymbol: ----\n", node->line_no, node->value, node->tk_data.val, node->parent->value);
         else if (!strcmp(node->value, "RNUM"))
             fprintf(outfile, "Lexeme: ----, Line no: %d, Tk name: %s, ValueIfNumber: %f, Parent: %s, isLeaf: YES, NodeSymbol: ----\n", node->line_no, node->value, node->tk_data.realVal, node->parent->value);
-        else if(node->parent == NULL)
+        else if (node->parent == NULL)
             fprintf(outfile, "Lexeme: %s, Line no: %d, Tk_name: %s, ValueIfNumber: ----, Parent: ROOT, YES, NodeSymbol: ----\n", node->tk_data.lexeme, node->line_no, node->value);
         else
             fprintf(outfile, "Lexeme: %s, Line no: %d, Tk_name: %s, ValueIfNumber: YE CASE HAI KYA, Parent: %s, YES, NodeSymbol: ----\n", node->tk_data.lexeme, node->line_no, node->value, node->parent->value);
@@ -196,20 +196,22 @@ void printParseTree(struct treeNode *node, FILE *outfile)
         return;
     }
     // print left child
-    if(node->children == NULL) printf("Root's child is null\n"); else printf("Root's child is not null\n");
+    if (node->children == NULL)
+        printf("Root's child is null\n");
+    else
+        printf("Root's child is not null\n");
     printParseTree(node->children, outfile);
 
     // print node
     if (node->parent != NULL)
-        fprintf(outfile, "RuleNo: %d, Lexeme: ----, Line no: ----, Tk name: ----, ValueIfNumber: ----, Parent: %s, IsLeaf: NO, NodeSymbol: %s\n", node->ruleNo,node->parent->value, node->value);
+        fprintf(outfile, "RuleNo: %d, Lexeme: ----, Line no: ----, Tk name: ----, ValueIfNumber: ----, Parent: %s, IsLeaf: NO, NodeSymbol: %s\n", node->ruleNo, node->parent->value, node->value);
     else
-        fprintf(outfile, "RuleNo: %d, Lexeme: ----, Line no: ----, Tk name: ----, ValueIfNumber: ----, Parent: ROOT, IsLeaf: NO, Node Symbol: %s\n",node->ruleNo, node->value);
+        fprintf(outfile, "RuleNo: %d, Lexeme: ----, Line no: ----, Tk name: ----, ValueIfNumber: ----, Parent: ROOT, IsLeaf: NO, Node Symbol: %s\n", node->ruleNo, node->value);
     // fprintf(outfile,"%s\n", node->value);
 
     // print other children
-    if(node->children==NULL)
+    if (node->children == NULL)
         return;
-
 
     struct treeNode *temp;
     temp = node->children->nextSibling;
@@ -222,44 +224,51 @@ void printParseTree(struct treeNode *node, FILE *outfile)
     return;
 }
 
-//prints AST in inorder traversal
-void printAST(struct treeNode* root,FILE *outfile){
-    if(root == NULL)
+// prints AST in inorder traversal
+void printAST(struct treeNode *root, FILE *outfile)
+{
+    if (root == NULL)
         return;
 
-    printAST(root->children,outfile);
+    printAST(root->children, outfile);
 
-    if(root->addr!=NULL)
-        printAST(root->addr,outfile);
-    else{
-        // struct treeNode *temp;
-        // temp = root;
-        //while(temp!=NULL){
-            fprintf(outfile,"%s\n",root->value,outfile);
-        //     temp = temp->next;
+    if (root->addr != NULL)
+    {
+        printAST(root->addr, outfile);
+    }
+    else
+    {
+        // printf("Root ki value %s\n",root->value);
+        fprintf(outfile, "%s\n", root->value);
+       
+        // while(root->next!=NULL){
+        //     root=root->next;
+        //     fprintf(outfile,"LIST:%s\n",root->value);
+        //     if(root->pair!=NULL)
+        //         fprintf(outfile,"PAIR:%s\n",root->pair->value);
         // }
     }
 
-    if(root->children == NULL)
-        return;
-    
-    struct treeNode *temp;
-    temp = root->children->astnextSibling;
-    if(temp == NULL)
+    if (root->children != NULL)
     {
-        temp = root->children->nextSibling;
+        struct treeNode *temp;
+        temp = root->children->astnextSibling;
+
         while (temp != NULL)
         {
-            printAST(temp,outfile);
-            temp = temp->nextSibling;
-        }
-    }
-    else{
-        while (temp != NULL)
-        {
-            printAST(temp,outfile);
+            printAST(temp, outfile);
             temp = temp->astnextSibling;
         }
+    }
+
+    if(root->pair!=NULL)
+        printAST(root->pair, outfile);
+
+    root = root->next;
+    while (root != NULL)
+    {
+        printAST(root, outfile);
+        root = root->next;
     }
 }
 
@@ -274,7 +283,7 @@ void runParser(FILE *fp2)
         return;
     }
 
-        // parser initialisations
+    // parser initialisations
 
     // grammar generate in main
 
@@ -301,7 +310,7 @@ void runParser(FILE *fp2)
     currExpand = tree_node;
 
     getnextblock(fp, buff1);
-    driverFlag2=0;
+    driverFlag2 = 0;
     driverFlag = 0;
     while (!driverFlag)
     {
@@ -309,8 +318,9 @@ void runParser(FILE *fp2)
         runPDA();
         // if(driverFlag2)driverFlag=1;
     }
-    while (isEpsilon[get_hash(s_top->value)]){
-        printf("Current Expand is:%s\n",currExpand->value);
+    while (isEpsilon[get_hash(s_top->value)])
+    {
+        // printf("Current Expand is:%s\n", currExpand->value);
         currExpand->ruleNo = 7;
         s_pop();
     }
@@ -329,13 +339,15 @@ void runParser(FILE *fp2)
         }
     }
 
-    //printf("%s\n",root->value);
+    // printf("%s\n",root->value);
     createAST(root);
-    //printf("%s",root->value);
-    //printParseTree(root,stdout);
+    // printf("%s",root->value);
+    // printParseTree(root,stdout);
     fprintf(fp2, "AST TREE:\n");
-    //printParseTree(root, fp2);
-    printAST(root,fp2);
+    // printParseTree(root, fp2);
+    //  printf("VALUE OF ADDR BEFORE:%s\n",root->addr->value);
+    printAST(root, fp2);
+    // printf("VALUE OF ADDR AFTER:%s\n",root->addr->value);
     free(element);
     free(tree_node);
     return;
@@ -401,15 +413,14 @@ int main(int argc, char *argv[])
         buff1 = (char *)malloc(buffer_size * sizeof(char));
         buff2 = (char *)malloc(buffer_size * sizeof(char));
         state = 0;
-        forward =0;
-        begin=0;
-        do_not_refill=0;
-        flag=0;
-        current_line_no=1;
-        generateToken=0;
-        token_found=0;
-        errorToken=0;
-        
+        forward = 0;
+        begin = 0;
+        do_not_refill = 0;
+        flag = 0;
+        current_line_no = 1;
+        generateToken = 0;
+        token_found = 0;
+        errorToken = 0;
 
         switch (option)
         {
@@ -456,7 +467,8 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                if(!generateToken)print_token();
+                if (!generateToken)
+                    print_token();
             }
             fclose(source_code);
         }
@@ -466,7 +478,8 @@ int main(int argc, char *argv[])
         {
             fp = fopen(argv[1], "r");
             FILE *fp2 = fopen(argv[2], "w");
-            if(fp2 == NULL){
+            if (fp2 == NULL)
+            {
                 printf("Output file not created, exit the program and start again.\n");
             }
             runParser(fp2);
@@ -495,11 +508,12 @@ int main(int argc, char *argv[])
         }
         break;
         case 5:
-        createAST(root);
-        if(root == NULL) printf("DED KHATAM\n");
-        printf("%s\n",root->value);
-        printParseTree(root,stdout);
-        break;
+            createAST(root);
+            if (root == NULL)
+                printf("DED KHATAM\n");
+            printf("%s\n", root->value);
+            printParseTree(root, stdout);
+            break;
         default:
             printf("\n choose one of the given options\n");
             break;

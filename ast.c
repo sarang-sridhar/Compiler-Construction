@@ -172,15 +172,19 @@ void createAST(struct treeNode *root)
     {
         return;
     }
+    printf("RULE NO. IS:%d for %s\n",rule_no,root->value);
+    if(root->children == NULL) printf("\nNULL\n");
+    printf("CHILDREN IS:%f\n",root->children);
     // if(!strcmp(root->value,"otherModules"))
     // printf("\nOthermodules called on %d\n",rule_no);
     // iterate through all children(top-down rules to be added here)
     while (temp_child != NULL)
     {
-
+        printf("\nISKE ANDAR GHUUUUUUUSS:%s\n",temp_child->value);
         freenode = temp_child;
         if (temp_child->isTerminal && !is_important_terminal(temp_child->value))
         {
+            printf("ISKE ANDAR GHUS GAYA KYA?\n");
             // printf("****%s*****: NODE FREED",temp_child->value);
             temp_child = temp_child->nextSibling;
             // if(freenode != NULL)
@@ -195,6 +199,7 @@ void createAST(struct treeNode *root)
             // printf("RHS:%s",grammar[rule_no-1]->forward_link->value);
             continue;
         }
+        printf("\nDID OTHERMODULES COME HERE?\n");
 
         switch (rule_no)
         {
@@ -215,8 +220,9 @@ void createAST(struct treeNode *root)
             break;
 
         case 2:
-            // printf("CreateAST Called on:%s\n",temp_child->value);
+            printf("CreateAST Called on:%s\n",temp_child->value);
             createAST(temp_child);
+            printf("\n%s:HELLO\n",temp_child->value);
             if (!strcmp(temp_child->value, "moduleDeclarations"))
             {
                 children[count++] = temp_child->syn;
@@ -226,12 +232,13 @@ void createAST(struct treeNode *root)
             }
             if (!strcmp(temp_child->value, "otherModules"))
             {
+                printf("Othermodules\n");
                 children[count++] = temp_child->syn;
                 // printf("\nBefore making PROGRAM node\n");
                 if (temp_child->nextSibling == NULL)
                 {
                     root->addr = makeNewNode("PROGRAM", children, 4);
-                    //printf("IS NODE KA NAAM HAI:%s\n", root->addr->value);
+                    printf("IS NODE KA NAAM HAI:\n");
                 }
                 // printf("\nAfter making PROGRAM node\n");
                 temp_child = temp_child->nextSibling;
@@ -240,10 +247,13 @@ void createAST(struct treeNode *root)
             }
             if (!strcmp(temp_child->value, "driverModule"))
             {
+                printf("NUll hai kya?:%s\n",temp_child->addr->value);
                 children[count++] = temp_child->addr;
                 // root->addr = makeNewNode("PROGRAM", children, 4);
                 temp_child = temp_child->nextSibling;
+                printf("DELETE KE PEHLE\n");
                 deleteNode(freenode);
+                printf("DELETE KE BAAD\n");
                 continue;
             }
 
@@ -303,8 +313,10 @@ void createAST(struct treeNode *root)
 
         case 7:
             // printf("\nCreated AST called on %s's child\n",root->value);
+            printf(":()\n");
             root->syn = NULL;
             createAST(temp_child);
+            printf("SAD LYF\n");
             return;
 
         case 8:
@@ -312,6 +324,7 @@ void createAST(struct treeNode *root)
             createAST(temp_child);
             if (!strcmp(temp_child->value, "moduleDef"))
             {
+                printf("IDHAR?\n");
                 root->addr = temp_child->syn;
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
@@ -514,6 +527,7 @@ void createAST(struct treeNode *root)
         case 26:
             //("Creating AST called on:%s\n",temp_child->value);
             createAST(temp_child);
+            printf("WHAT ABOUT THIS?\n");
             if (!strcmp(temp_child->value, "statements"))
             {
                 //("\nInside if for statements\n");
@@ -526,6 +540,7 @@ void createAST(struct treeNode *root)
 
         case 27:
             createAST(temp_child);
+            printf("IDHAR AAYA KYA?\n");
             if (!strcmp(temp_child->value, "statement"))
             {
                 temp = temp_child->addr;
@@ -567,6 +582,7 @@ void createAST(struct treeNode *root)
 
         case 31:
             createAST(temp_child);
+            printf("IDHAR BHI BOTTOM UP ME AAYA\n");
             root->addr = temp_child->addr;
             temp_child = temp_child->nextSibling;
             deleteNode(freenode);
@@ -1585,7 +1601,8 @@ void createAST(struct treeNode *root)
 
         case 121:
             createAST(temp_child);
-            if (!strcmp(temp_child->value, "idList"))
+            printf("BOTTOM UP ME AAYA\n");
+            if (!strcmp(temp_child->value, "idList2"))
             {
                 children[count++] = temp_child->syn;
                 temp_child = temp_child->nextSibling;
@@ -1784,7 +1801,52 @@ void createAST(struct treeNode *root)
                 return;
             }
             break;
+        
+        case 135:
+            // top down
+            
+            createAST(temp_child);
+            // bottom up
+            if (!strcmp(temp_child->value, "ID"))
+            {
+                
+                temp = temp_child;
+            }
 
+            else if (!strcmp(temp_child->value, "moreId2"))
+            {
+                root->syn = insert_at_beginning(temp_child->syn, temp);
+                deleteNode(freenode);
+                return;
+            }
+            break;
+  
+        case 136:
+            // top down
+           
+            createAST(temp_child);
+            // bottom up
+            if (!strcmp(temp_child->value, "ID"))
+            {
+               
+                temp = temp_child;
+            }
+
+            else if (!strcmp(temp_child->value, "moreId2"))
+            {
+                root->syn = insert_at_beginning(temp_child->syn, temp);
+                deleteNode(freenode);
+                return;
+            }
+
+            break;
+
+        case 137:
+            printf("137 me ghusa\n");
+            root->syn = NULL;
+            deleteNode(freenode);
+            return;
+        
         default:
             printf("No such rule exists");
         }

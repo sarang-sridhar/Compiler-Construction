@@ -341,6 +341,7 @@ void runParser(FILE *fp2)
 
     // printf("%s\n",root->value);
     createAST(root);
+    printf("LMAOO DED\n");
     // printf("%s",root->value);
     // printParseTree(root,stdout);
     fprintf(fp2, "AST TREE:\n");

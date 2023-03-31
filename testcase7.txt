@@ -1,3 +1,4 @@
 <<<driver program>>>
 start
+    declare v : integer;
 end

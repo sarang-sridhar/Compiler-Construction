@@ -322,6 +322,7 @@ void runParser(FILE *fp2)
     {
         // printf("Current Expand is:%s\n", currExpand->value);
         currExpand->ruleNo = 7;
+        addChild(currExpand,grammar[6]->forward_link);
         s_pop();
     }
 
@@ -340,14 +341,14 @@ void runParser(FILE *fp2)
     }
 
     // printf("%s\n",root->value);
-    //createAST(root);
+    createAST(root);
     printf("\nLMAOO DED\n");
     // printf("%s",root->value);
-    // printParseTree(root,stdout);
-    //fprintf(fp2, "AST TREE:\n");
+    //printParseTree(root,stdout);
+    fprintf(fp2, "AST TREE:\n");
     // printParseTree(root, fp2);
     //  printf("VALUE OF ADDR BEFORE:%s\n",root->addr->value);
-    //printAST(root, fp2);
+    printAST(root, fp2);
     // printf("VALUE OF ADDR AFTER:%s\n",root->addr->value);
     free(element);
     free(tree_node);

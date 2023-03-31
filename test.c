@@ -54,13 +54,19 @@ void bubbleSort(int *arr, int n)
 int main()
 {
     int arr[130];
-    for (int i = 0; i < 130; i++)
-        arr[i] = get_hash_terminal(nonTerminals[i], 1619);
-    bubbleSort(arr, 130);
-    for (int i = 0; i < 130; i++)
-    {
-        printf("%d ", arr[i]);
-        if (arr[i] == arr[i + 1])
-            printf("Clash here");
+    for(int num= 2000;num>=1;num--){
+        int flag = 0;
+        for (int i = 0; i < 130; i++)
+            arr[i] = get_hash_terminal(nonTerminals[i],num);
+        bubbleSort(arr, 130);
+        for (int i = 0; i < 130; i++)
+        {
+            printf("%d ", arr[i]);
+            if (arr[i] == arr[i + 1])
+                flag = 1;
+                //printf("Clash here");
+        }
+        if(flag == 0)
+            printf("%d\n",num);
     }
 }

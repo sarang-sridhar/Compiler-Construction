@@ -322,6 +322,7 @@ void runParser(FILE *fp2)
     {
         // printf("Current Expand is:%s\n", currExpand->value);
         currExpand->ruleNo = 7;
+        addChild(currExpand,grammar[6]->forward_link);
         s_pop();
     }
 
@@ -341,8 +342,9 @@ void runParser(FILE *fp2)
 
     // printf("%s\n",root->value);
     createAST(root);
+    printf("\nLMAOO DED\n");
     // printf("%s",root->value);
-    // printParseTree(root,stdout);
+    //printParseTree(root,stdout);
     fprintf(fp2, "AST TREE:\n");
     // printParseTree(root, fp2);
     //  printf("VALUE OF ADDR BEFORE:%s\n",root->addr->value);
@@ -399,6 +401,13 @@ int main(int argc, char *argv[])
 
     // compute first and follow
     computeFirstAndFollow();
+    for (int i = 0; i <NUM_RULES; i++)
+    {
+        printf("RULE:%d  ", i+1);
+        for (int j = 0; firstAndFollow[i][j] != NULL; j++)
+            printf("%s ", firstAndFollow[i][j]);
+        printf("\n");
+    }
     createParseTable();
 
     t1_end = clock();

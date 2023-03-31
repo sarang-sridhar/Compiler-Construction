@@ -118,7 +118,7 @@ relationalOp,GT
 relationalOp,GE
 relationalOp,EQ
 relationalOp,NE
-declareStmt,DECLARE,idList,COLON,dataType,SEMICOL
+declareStmt,DECLARE,idList2,COLON,dataType,SEMICOL
 conditionalStmt,SWITCH,BO,ID,BC,START,caseStmt,default,END
 caseStmt,CASE,value,COLON,statements,BREAK,SEMICOL,post
 post,caseStmt
@@ -132,3 +132,6 @@ iterativeStmt,FOR,BO,ID,IN,range_for,BC,START,statements,END
 iterativeStmt,WHILE,BO,arithmeticOrBooleanExpr,BC,START,statements,END
 range_for,sign,NUM,RANGEOP,sign,NUM
 range,sign,index,RANGEOP,sign,index
+idList2,ID,moreId2
+moreId2,COMMA,ID,moreId2
+moreId2,EPSILON

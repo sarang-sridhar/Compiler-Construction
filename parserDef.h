@@ -12,9 +12,9 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 #include<stdlib.h>
 #include<string.h>
 #define HASH_MOD 1619
-#define NUM_RULES 134
-#define NON_TERM 70
-#define TOTAL_TERM 128
+#define NUM_RULES 137
+#define NON_TERM 72
+#define TOTAL_TERM 130
 
 //for storing grammar node
 struct node
@@ -33,8 +33,8 @@ struct ruleNode
 };
 
 //both non-terminals and terminals
-//non terminals = 70
-char nonTerminals[128][24] = {"startprogram","program","moduleDeclarations","moduleDeclaration","otherModules",
+//non terminals = 72
+char nonTerminals[130][24] = {"startprogram","program","moduleDeclarations","moduleDeclaration","otherModules",
 "driverModule","module","ret","input_plist","moreList","output_plist","moreOutput",
 "dataType","type","moduleDef","statements","statement","ioStmt","print_var","whichId2",
 "boolvar","whichId","index","sign","aVar","var_id_num","newArithmeticExpr","startExpr",
@@ -43,7 +43,7 @@ char nonTerminals[128][24] = {"startprogram","program","moduleDeclarations","mod
 "moreId","actualParameter","expression","arithmeticOrBooleanExpr","ab1","anyTerm","ab2","u","after_unary",
 "arithmeticExpr","a1","term","a2","nextTerm","op1","op2","bop","relationalOp",
 "declareStmt","conditionalStmt","caseStmt","post","value","default","iterativeStmt",
-"range_for","range","INTEGER","REAL","BOOLEAN","OF","ARRAY","START","END","DECLARE","MODULE","DRIVER",
+"range_for","range","idList2","moreId2","INTEGER","REAL","BOOLEAN","OF","ARRAY","START","END","DECLARE","MODULE","DRIVER",
 "PROGRAM","GET_VALUE","PRINT","USE","WITH","PARAMETERS","TAKES","INPUT","RETURNS","FOR","IN","SWITCH",
 "CASE","BREAK","DEFAULT","WHILE","AND","OR","TRUE","FALSE","ID","NUM","RNUM","PLUS","MINUS","MUL","DIV",
 "LT","LE","GE","GT","EQ","NE","DEF","ENDDEF","DRIVERDEF","DRIVERENDDEF","COLON","RANGEOP","SEMICOL",

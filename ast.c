@@ -59,7 +59,7 @@ struct treeNode *makeNewNode(char *name, struct treeNode *list[], int count)
     node->next = NULL;
     node->astnextSibling = NULL;
     node->astprevSibling = NULL;
-    //printf("\nafter strcpy\n");
+    // printf("\nafter strcpy\n");
     int i;
     node->children = list[0];
     node->tk_data.val = 0;
@@ -82,7 +82,7 @@ struct treeNode *makeNewNode(char *name, struct treeNode *list[], int count)
     {
         if (list[k] == NULL)
             continue;
-        //printf("Entries:%s\n", list[k]->value);
+        // printf("Entries:%s\n", list[k]->value);
         temp->astnextSibling = list[k];
         temp2 = temp;
         temp = temp->astnextSibling;
@@ -103,7 +103,7 @@ void deleteNode(struct treeNode *node)
         return;
     }
 
-    //printf("DELETED NODE:%s\n", node->value);
+    // printf("DELETED NODE:%s\n", node->value);
 
     if (node->prevSibling == NULL)
     {
@@ -162,6 +162,8 @@ void createAST(struct treeNode *root)
 
     // capture rule number from treeNode
     int rule_no = root->ruleNo;
+    if (!strcmp(root->value, "otherModules"))
+        printf("Rule no : %d %d %s \n", rule_no, root->isTerminal, root->children->value);
 
     // if(!strcmp(root->value,"EPSILON"))
     //     printf("EPSILON's isTerminal:%d",root->isTerminal);
@@ -172,16 +174,20 @@ void createAST(struct treeNode *root)
     {
         return;
     }
+    // printf("RULE NO. IS:%d for %s\n",rule_no,root->value);
+    // if(root->children == NULL) printf("\nNULL\n");
+    // printf("CHILDREN IS:%f\n",root->children);
     // if(!strcmp(root->value,"otherModules"))
     // printf("\nOthermodules called on %d\n",rule_no);
     // iterate through all children(top-down rules to be added here)
     while (temp_child != NULL)
     {
-
+        // printf("\n%s\n",temp_child->line_no);
         freenode = temp_child;
         if (temp_child->isTerminal && !is_important_terminal(temp_child->value))
         {
-            // printf("****%s*****: NODE FREED",temp_child->value);
+            // printf("ISKE ANDAR GHUS GAYA KYA?\n");
+            //  printf("****%s*****: NODE FREED",temp_child->value);
             temp_child = temp_child->nextSibling;
             // if(freenode != NULL)
             // printf("delete node called:%s\n",freenode->value);
@@ -195,13 +201,16 @@ void createAST(struct treeNode *root)
             // printf("RHS:%s",grammar[rule_no-1]->forward_link->value);
             continue;
         }
+        // printf("\nDID OTHERMODULES COME HERE?\n");
 
         switch (rule_no)
         {
         case 1:
             // top-down
             // printf("CreateAST Called on:%s\n",temp_child->value);
+            printf("Hello\n");
             createAST(temp_child);
+
             // printf("\nAfter createAST\n");
             if (!strcmp(temp_child->value, "program"))
             {
@@ -212,11 +221,13 @@ void createAST(struct treeNode *root)
                 //  printf("value of startprogram's children:%s\n",root->children->value);
                 continue;
             }
+
             break;
 
         case 2:
-            // printf("CreateAST Called on:%s\n",temp_child->value);
+            printf("create ast called on: %s\n", temp_child->value);
             createAST(temp_child);
+
             if (!strcmp(temp_child->value, "moduleDeclarations"))
             {
                 children[count++] = temp_child->syn;
@@ -226,12 +237,13 @@ void createAST(struct treeNode *root)
             }
             if (!strcmp(temp_child->value, "otherModules"))
             {
+                printf("Othermodules\n");
                 children[count++] = temp_child->syn;
                 // printf("\nBefore making PROGRAM node\n");
                 if (temp_child->nextSibling == NULL)
                 {
+
                     root->addr = makeNewNode("PROGRAM", children, 4);
-                    //printf("IS NODE KA NAAM HAI:%s\n", root->addr->value);
                 }
                 // printf("\nAfter making PROGRAM node\n");
                 temp_child = temp_child->nextSibling;
@@ -240,10 +252,13 @@ void createAST(struct treeNode *root)
             }
             if (!strcmp(temp_child->value, "driverModule"))
             {
+                printf("Entered here\n");
                 children[count++] = temp_child->addr;
                 // root->addr = makeNewNode("PROGRAM", children, 4);
                 temp_child = temp_child->nextSibling;
+                printf("Last sibling ka value: %s\n", temp_child->value);
                 deleteNode(freenode);
+                printf("Last sibling ka value: %s\n", temp_child->value);
                 continue;
             }
 
@@ -303,8 +318,10 @@ void createAST(struct treeNode *root)
 
         case 7:
             // printf("\nCreated AST called on %s's child\n",root->value);
+            printf("\n:()\n");
             root->syn = NULL;
             createAST(temp_child);
+            printf("SAD LYF\n");
             return;
 
         case 8:
@@ -312,6 +329,7 @@ void createAST(struct treeNode *root)
             createAST(temp_child);
             if (!strcmp(temp_child->value, "moduleDef"))
             {
+
                 root->addr = temp_child->syn;
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
@@ -514,6 +532,7 @@ void createAST(struct treeNode *root)
         case 26:
             //("Creating AST called on:%s\n",temp_child->value);
             createAST(temp_child);
+            printf("WHAT ABOUT THIS?\n");
             if (!strcmp(temp_child->value, "statements"))
             {
                 //("\nInside if for statements\n");
@@ -526,6 +545,7 @@ void createAST(struct treeNode *root)
 
         case 27:
             createAST(temp_child);
+            printf("IDHAR AAYA KYA?\n");
             if (!strcmp(temp_child->value, "statement"))
             {
                 temp = temp_child->addr;
@@ -536,7 +556,7 @@ void createAST(struct treeNode *root)
             if (!strcmp(temp_child->value, "statements"))
             {
                 root->syn = insert_at_beginning(temp_child->syn, temp);
-                //printf("SYN KI VALUE HAI:%s\n",root->syn->children->astnextSibling->value);
+                // printf("SYN KI VALUE HAI:%s\n",root->syn->children->astnextSibling->value);
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;
@@ -560,7 +580,7 @@ void createAST(struct treeNode *root)
         case 30:
             createAST(temp_child);
             root->addr = temp_child->addr;
-            //printf("Statement's addr contains:%s",root->addr->value);
+            // printf("Statement's addr contains:%s",root->addr->value);
             temp_child = temp_child->nextSibling;
             deleteNode(freenode);
             continue;
@@ -686,7 +706,7 @@ void createAST(struct treeNode *root)
             {
                 children[count++] = temp_child->addr;
                 root->addr = makeNewNode("ARRAY_ACCESS", children, 2);
-                printf("IS NODE KA NAAM HAI:%s\n", root->addr->value);
+                // printf("IS NODE KA NAAM HAI:%s\n", root->addr->value);
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;
@@ -695,7 +715,7 @@ void createAST(struct treeNode *root)
 
         case 45:
             root->addr = root->inh;
-            //printf("*****WHICH ID'S ADDR IS*****:%s\n", root->addr->value);
+            // printf("*****WHICH ID'S ADDR IS*****:%s\n", root->addr->value);
             createAST(temp_child);
             return;
 
@@ -989,19 +1009,19 @@ void createAST(struct treeNode *root)
             // top down
             createAST(temp_child);
             // only one child possible
-            //printf("temp child is:%s\n", temp_child->value);
-            //printf("CHILD1 of temp:%s\n", temp_child->addr->children->value);
+            // printf("temp child is:%s\n", temp_child->value);
+            // printf("CHILD1 of temp:%s\n", temp_child->addr->children->value);
             // if (temp_child->addr->children->nextSibling == NULL)
             //     printf("CHILD2 of temp:NULL\n");
             // else
             //     printf("CHILD2 of temp:%s\n", temp_child->addr->children->nextSibling->value);
             root->addr = temp_child->addr;
-           //printf("THIS IS;%s\n",root->addr->value);
-            //printf("CHILD1:%s\n", root->addr->children->value);
-            // if (root->addr->children->nextSibling == NULL)
-            //     printf("CHILD2:NULL\n");
-            // else
-            //     printf("CHILD2:%s\n", root->addr->children->nextSibling->value);
+            // printf("THIS IS;%s\n",root->addr->value);
+            // printf("CHILD1:%s\n", root->addr->children->value);
+            //  if (root->addr->children->nextSibling == NULL)
+            //      printf("CHILD2:NULL\n");
+            //  else
+            //      printf("CHILD2:%s\n", root->addr->children->nextSibling->value);
             deleteNode(freenode);
             return;
 
@@ -1030,15 +1050,15 @@ void createAST(struct treeNode *root)
             if (!strcmp(temp_child->value, "whichStmt"))
             {
                 root->addr = temp_child->addr;
-                //printf("element is %s\n", root->addr->value);
-                // printf("CHILD1:%s\n", root->addr->children->value);
-                // printf("CHILD2:%s\n", root->addr->children->nextSibling->value);
+                // printf("element is %s\n", root->addr->value);
+                //  printf("CHILD1:%s\n", root->addr->children->value);
+                //  printf("CHILD2:%s\n", root->addr->children->nextSibling->value);
                 deleteNode(freenode);
                 //  printf("root's left child is %s\n",root->children->value);
                 //  if(root->children->nextSibling == NULL)
                 //      printf("root's right child is NULL\n");
                 //  printf("ROOT'S ADDRESS:%s\n",root->addr->value);
-                //free(temp_child);
+                // free(temp_child);
                 return;
             }
 
@@ -1058,7 +1078,7 @@ void createAST(struct treeNode *root)
             // only one child possible
             temp_child->inh = root->inh;
             createAST(temp_child);
-            //printf("VALUE IS THIS:%s\n", temp_child->addr->value);
+            // printf("VALUE IS THIS:%s\n", temp_child->addr->value);
             root->addr = temp_child->addr;
             deleteNode(freenode);
             return;
@@ -1076,9 +1096,9 @@ void createAST(struct treeNode *root)
                 //     printf("NULL\n");
                 children[count++] = temp_child->addr;
                 root->addr = makeNewNode("LVALUEID", children, 2);
-                //printf("IS NODE KA NAAM HAI:%s\n", root->addr->value);
-                // printf("CHILD1:%s\n",root->addr->children->value);
-                // printf("CHILD2:%s\n",root->addr->children->nextSibling->value);
+                // printf("IS NODE KA NAAM HAI:%s\n", root->addr->value);
+                //  printf("CHILD1:%s\n",root->addr->children->value);
+                //  printf("CHILD2:%s\n",root->addr->children->nextSibling->value);
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;
@@ -1104,7 +1124,7 @@ void createAST(struct treeNode *root)
                 children[1] = temp_child->addr;
                 children[0] = temp;
                 root->addr = makeNewNode("LVALUEARRAY", children, 2);
-                //printf("DOOSRA BACCHA IS:%s\n",root->addr->children->astnextSibling->value);
+                // printf("DOOSRA BACCHA IS:%s\n",root->addr->children->astnextSibling->value);
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;
@@ -1453,7 +1473,7 @@ void createAST(struct treeNode *root)
             {
                 children[count++] = root->inh;
                 children[count++] = temp_child->addr;
-                //printf("\nbefore making new node:%s\n", node_name);
+                // printf("\nbefore making new node:%s\n", node_name);
                 root->addr = makeNewNode(node_name, children, 2);
             }
             temp_child = temp_child->nextSibling;
@@ -1524,7 +1544,7 @@ void createAST(struct treeNode *root)
 
         case 109:
             root->addr = temp_child;
-            //printf("*********VALUE%s*********\n", temp_child->value);
+            // printf("*********VALUE%s*********\n", temp_child->value);
             createAST(temp_child);
             break;
 
@@ -1585,7 +1605,8 @@ void createAST(struct treeNode *root)
 
         case 121:
             createAST(temp_child);
-            if (!strcmp(temp_child->value, "idList"))
+
+            if (!strcmp(temp_child->value, "idList2"))
             {
                 children[count++] = temp_child->syn;
                 temp_child = temp_child->nextSibling;
@@ -1756,7 +1777,7 @@ void createAST(struct treeNode *root)
             if (!strcmp(temp_child->value, "sign"))
             {
                 children[0] = temp_child->addr;
-                printf("ISME GHUSA\n");
+                // printf("ISME GHUSA\n");
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;
@@ -1765,8 +1786,8 @@ void createAST(struct treeNode *root)
             {
                 children[1] = temp_child->addr;
                 temp = makeNewNode("LEFT-INDEX", children, 2);
-                printf("left index ka left child:%s\n",temp->children->value);
-                printf("left index ka right child:%s\n",temp->children->astnextSibling->value);
+                // printf("left index ka left child:%s\n",temp->children->value);
+                // printf("left index ka right child:%s\n",temp->children->astnextSibling->value);
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;
@@ -1774,16 +1795,61 @@ void createAST(struct treeNode *root)
             else if (!strcmp(temp_child->value, "index") && temp_child->nextSibling == NULL)
             {
                 children[1] = temp_child->addr;
-                printf("BEFORE RIGHT-INDEX VALUE CHECKING:%s\n",temp->children->astnextSibling->value);
+                // printf("BEFORE RIGHT-INDEX VALUE CHECKING:%s\n",temp->children->astnextSibling->value);
                 children[1] = makeNewNode("RIGHT-INDEX", children, 2);
                 children[0] = temp;
-                printf("BEFORE VALUE CHECKING:%s\n",temp->children->astnextSibling->value);
+                // printf("BEFORE VALUE CHECKING:%s\n",temp->children->astnextSibling->value);
                 root->addr = makeNewNode("RANGE", children, 2);
-                printf("VALUE CHECKING:%s\n",root->addr->children->children->astnextSibling->value);
+                // printf("VALUE CHECKING:%s\n",root->addr->children->children->astnextSibling->value);
                 deleteNode(freenode);
                 return;
             }
             break;
+
+        case 135:
+            // top down
+            // printf("*********************case 135 executed\n");
+            createAST(temp_child);
+            // bottom up
+            if (!strcmp(temp_child->value, "ID"))
+            {
+
+                temp = temp_child;
+            }
+
+            else if (!strcmp(temp_child->value, "moreId2"))
+            {
+                root->syn = insert_at_beginning(temp_child->syn, temp);
+                deleteNode(freenode);
+                return;
+            }
+            break;
+
+        case 136:
+            // top down
+
+            createAST(temp_child);
+            // bottom up
+            if (!strcmp(temp_child->value, "ID"))
+            {
+
+                temp = temp_child;
+            }
+
+            else if (!strcmp(temp_child->value, "moreId2"))
+            {
+                root->syn = insert_at_beginning(temp_child->syn, temp);
+                deleteNode(freenode);
+                return;
+            }
+
+            break;
+
+        case 137:
+            // printf("137 me ghusa\n");
+            root->syn = NULL;
+            deleteNode(freenode);
+            return;
 
         default:
             printf("No such rule exists");

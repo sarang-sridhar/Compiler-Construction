@@ -1,7 +1,4 @@
-<<module test>>
-takes input [a:integer,b:real];
-start
-end
 <<<driver program>>>
 start
+    declare 2 : boolean;
 end

@@ -238,15 +238,7 @@ void printAST(struct treeNode *root, FILE *outfile)
     }
     else
     {
-        // printf("Root ki value %s\n",root->value);
         fprintf(outfile, "%s\n", root->value);
-       
-        // while(root->next!=NULL){
-        //     root=root->next;
-        //     fprintf(outfile,"LIST:%s\n",root->value);
-        //     if(root->pair!=NULL)
-        //         fprintf(outfile,"PAIR:%s\n",root->pair->value);
-        // }
     }
 
     if (root->children != NULL)
@@ -265,10 +257,10 @@ void printAST(struct treeNode *root, FILE *outfile)
         printAST(root->pair, outfile);
 
     root = root->next;
-    while (root != NULL)
+    if(root != NULL)
     {
         printAST(root, outfile);
-        root = root->next;
+        // root = root->next;
     }
 }
 
@@ -401,13 +393,13 @@ int main(int argc, char *argv[])
 
     // compute first and follow
     computeFirstAndFollow();
-    for (int i = 0; i <NUM_RULES; i++)
-    {
-        printf("RULE:%d  ", i+1);
-        for (int j = 0; firstAndFollow[i][j] != NULL; j++)
-            printf("%s ", firstAndFollow[i][j]);
-        printf("\n");
-    }
+    // for (int i = 0; i <NUM_RULES; i++)
+    // {
+    //     printf("RULE:%d  ", i+1);
+    //     for (int j = 0; firstAndFollow[i][j] != NULL; j++)
+    //         printf("%s ", firstAndFollow[i][j]);
+    //     printf("\n");
+    // }
     createParseTable();
 
     t1_end = clock();

@@ -78,7 +78,7 @@ whichStmt,lvalueARRStmt
 lvalueIDStmt,ASSIGNOP,expression,SEMICOL
 lvalueARRStmt,SQBO,newArithmeticExpr,SQBC,ASSIGNOP,expression,SEMICOL
 moduleReuseStmt,optional,USE,MODULE,ID,WITH,PARAMETERS,idList,SEMICOL
-optional,SQBO,idList,SQBC,ASSIGNOP
+optional,SQBO,idList2,SQBC,ASSIGNOP
 optional,EPSILON
 idList,actualParameter,moreId
 moreId,COMMA,actualParameter,moreId

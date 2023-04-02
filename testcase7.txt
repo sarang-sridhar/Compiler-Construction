@@ -1,4 +1,4 @@
 <<<driver program>>>
 start
-    declare v : integer;
+    use module sum with parameters v, w,-2,+4,true; 
 end

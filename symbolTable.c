@@ -1,5 +1,5 @@
 #include "symbolTable.h"
-#include<string.c>
+#include<string.h>
 #include<stdio.h>
 
 int get_sym_table_hash(char* str){
@@ -114,12 +114,83 @@ struct id_symbol_table* initST(int nesting_num){
     //use this fn to initialise ST after offset,scopes etc have been added
     struct id_symbol_table* t = malloc(struct id_symbol_table);
     t->child_table=NULL;
+    t->parent_table=NULL;
+    t->right_sibling=NULL;
+    t->left_sibling=NULL;
+    t->nesting_value = nesting_num;
+    return t;
+}
+
+struct fn_symbol_table* initFST(int nesting_num){
+    struct fn_symbol_table* t = malloc(struct fn_symbol_table);
+    t->child_table=NULL;
+    t->parent_table=NULL;
+    t->right_sibling=NULL;
+    t->left_sibling=NULL;
     t->nesting_value = nesting_num;
     return t;
 }
 
 
 
+int main(){
+    struct id_symbol_table* st = initST(1);
+
+    struct treeNode* n1 = malloc(sizeof(struct treeNode));
+    n1->addr->value = "abc";
+    create_entry_and_insert(st,n1,INTEGER);
+    
+
+    struct treeNode* n2 = malloc(sizeof(struct treeNode));
+    n2->addr->value = "def";
+    create_entry_and_insert(st,n1,BOOLEAN);
+
+    struct treeNode* n3 = malloc(sizeof(struct treeNode));
+    n3->addr->value = "ghi";
+    create_entry_and_insert(st,n3,REAL);
+
+    struct treeNode* n4 = malloc(sizeof(struct treeNode));
+    n4->addr->value = "jkl";
+    create_entry_and_insert(st,n4,INTEGER);
+
+    struct treeNode* n5 = malloc(sizeof(struct treeNode));
+    n5->addr->value = "mno";
+    create_entry_and_insert(st,n5,BOOLEAN);
+
+    struct treeNode* n6 = malloc(sizeof(struct treeNode));
+    n6->addr->value = "pqr";
+    create_entry_and_insert(st,n1,REAL);
+
+    struct treeNode* n7 = malloc(sizeof(struct treeNode));
+    n7->addr->value = "aarya";
+    create_entry_and_insert(st,n7,REAL);
+
+    // struct treeNode* n1 = malloc(sizeof(struct treeNode));
+    // n1->addr->value = "stu";
+    // create_entry_and_insert(st,n1,NULL);
+
+    // struct treeNode* n1 = malloc(sizeof(struct treeNode));
+    // n1->addr->value = "abc";
+    // create_entry_and_insert(st,n1,NULL);
+
+    // struct treeNode* n1 = malloc(sizeof(struct treeNode));
+    // n1->addr->value = "abc";
+    // create_entry_and_insert(st,n1,NULL);
+
+    // struct treeNode* n1 = malloc(sizeof(struct treeNode));
+    // n1->addr->value = "abc";
+    // create_entry_and_insert(st,n1,NULL);
+
+
+    ST_ENTRY* temp = get_lexeme(st,"def");
+    if(temp==NULL){
+        printf("FAIL \n");
+        return 0;
+    }
+    printf("** %s ** \n",temp->id_lexeme);
+
+    return 0;
+}
 
 
 

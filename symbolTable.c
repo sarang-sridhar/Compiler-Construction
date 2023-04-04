@@ -16,6 +16,7 @@ int get_sym_table_hash(char* str){
     return abs(hash)%TABLE_SIZE;
 }
 
+
 void insert_fn_in_table(struct fn_symbol_table* table, FN_ENTRY* entry){
     int hash_value = get_sym_table_hash(entry->fn_name);
     if(table->arr[hash_value]==NULL){
@@ -34,12 +35,16 @@ void insert_fn_in_table(struct fn_symbol_table* table, FN_ENTRY* entry){
 
 void insert_in_table(struct id_symbol_table* table,  ST_ENTRY * entry){
     int hash_value = get_sym_table_hash(entry->id_lexeme);
-    if(table->arr[hash_value]==NULL){
-        table->arr[hash_value] = entry;
+    //printf("\n %s:%d \n",entry->id_lexeme,hash_value);
+    if(table->arr[hash_value] == NULL){
+        //printf("First-filling:%s \n",entry->id_lexeme);
+        table->arr[hash_value]= entry;
         return;
     }
     else{
         ST_ENTRY* temp = table->arr[hash_value];
+
+        //printf("\n Not-vacant:%s ",entry->id_lexeme);
         while(temp->next!=NULL){
             temp=temp->next;
         }
@@ -87,12 +92,11 @@ void create_entry_and_insert(struct id_symbol_table* table,struct treeNode* node
             printf("AST Node:%s is null \n",node->value);
             return;
         }
-
-        ST_ENTRY* temp;
+        ST_ENTRY* temp = malloc(sizeof(ST_ENTRY));
         temp->id_lexeme = node->addr->value;
-        temp->next=NULL;    
-        temp->type=t1;      //set type from driver
-        insert_in_table(temp,table);
+        temp->next = NULL;
+        temp->type = t1;
+        insert_in_table(table,temp);
         return;
 }
 
@@ -101,96 +105,101 @@ void create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct treeNod
             printf("AST Node:%s is null \n",node->value);
             return;
         }
-        FN_ENTRY* temp;
+        FN_ENTRY* temp = malloc(sizeof(FN_ENTRY));
         temp->ip_head = ip_list;
-        temp->op_head = op_head;
+        temp->op_head = op_list;
         temp->fn_name = node->addr->value;
         
-        insert_fn_in_table(temp,table);
+        insert_fn_in_table(table,temp);
         return;
 }
 
 struct id_symbol_table* initST(int nesting_num){
     //use this fn to initialise ST after offset,scopes etc have been added
-    struct id_symbol_table* t = malloc(struct id_symbol_table);
+    struct id_symbol_table* t = malloc(sizeof(struct id_symbol_table));
     t->child_table=NULL;
     t->parent_table=NULL;
     t->right_sibling=NULL;
     t->left_sibling=NULL;
     t->nesting_value = nesting_num;
+    for(int i=0;i<TABLE_SIZE;i++){
+        t->arr[i]=NULL;
+    }
     return t;
 }
 
 struct fn_symbol_table* initFST(int nesting_num){
-    struct fn_symbol_table* t = malloc(struct fn_symbol_table);
+    struct fn_symbol_table* t = malloc(sizeof(struct fn_symbol_table));
     t->child_table=NULL;
     t->parent_table=NULL;
     t->right_sibling=NULL;
     t->left_sibling=NULL;
     t->nesting_value = nesting_num;
+    for(int i=0;i<TABLE_SIZE;i++){
+        t->arr[i]=NULL;
+    }
     return t;
 }
 
 
 
-int main(){
-    struct id_symbol_table* st = initST(1);
+// int main(){
+//     struct id_symbol_table* st = initST(1);
+//     printf("\ninit success \n");
 
-    struct treeNode* n1 = malloc(sizeof(struct treeNode));
-    n1->addr->value = "abc";
-    create_entry_and_insert(st,n1,INTEGER);
+//     struct treeNode* n1 = malloc(sizeof(struct treeNode));
+
+//     struct treeNode* n11 = malloc(sizeof(struct treeNode));
+//     n1->addr = n11;
+//     strcpy(n11->value,"abc");
+//    // strcpy(n1->addr->value,"abc");
+//     TYPE t1;
+//     t1.id_type.id_dt=INTEGER;
+
+//     create_entry_and_insert(st,n1,t1);
+
+
+//     struct treeNode* n2 = malloc(sizeof(struct treeNode));
+//     struct treeNode* n22 = malloc(sizeof(struct treeNode));
+//     n2->addr = n22;
+//     strcpy(n22->value,"def");
+//    // strcpy(n2->addr->value,"def");
+//     TYPE t2;
+//     t2.id_type.id_dt=REAL;
+//     create_entry_and_insert(st,n2,t2);
+
+//     struct treeNode* n3 = malloc(sizeof(struct treeNode));
+//     struct treeNode* n33 = malloc(sizeof(struct treeNode));
+//     n3->addr = n33;
+//     strcpy(n33->value,"aarya");
+//     //strcpy(n3->addr->value,"aarya");
+//     TYPE t3;
+//     t3.id_type.id_dt=INTEGER;
+    
+//     create_entry_and_insert(st,n3,t3);
+
+
+//     struct treeNode* n4 = malloc(sizeof(struct treeNode));
+//     struct treeNode* n44 = malloc(sizeof(struct treeNode));
+//     n4->addr = n44;
+//     strcpy(n44->value,"great");
+//     //strcpy(n4->addr->value,"great");
+//     TYPE t4;
+//     t4.id_type.id_dt=BOOLEAN;
+//     create_entry_and_insert(st,n4,t4);
     
 
-    struct treeNode* n2 = malloc(sizeof(struct treeNode));
-    n2->addr->value = "def";
-    create_entry_and_insert(st,n1,BOOLEAN);
 
-    struct treeNode* n3 = malloc(sizeof(struct treeNode));
-    n3->addr->value = "ghi";
-    create_entry_and_insert(st,n3,REAL);
+//     ST_ENTRY* temp = get_lexeme(st,"def");
+//     // printf("IDHAR");
+//     if(temp==NULL){
+//         printf("FAIL \n");
+//         return 0;
+//     }
+//     printf("** %s ** \n",temp->id_lexeme);
 
-    struct treeNode* n4 = malloc(sizeof(struct treeNode));
-    n4->addr->value = "jkl";
-    create_entry_and_insert(st,n4,INTEGER);
-
-    struct treeNode* n5 = malloc(sizeof(struct treeNode));
-    n5->addr->value = "mno";
-    create_entry_and_insert(st,n5,BOOLEAN);
-
-    struct treeNode* n6 = malloc(sizeof(struct treeNode));
-    n6->addr->value = "pqr";
-    create_entry_and_insert(st,n1,REAL);
-
-    struct treeNode* n7 = malloc(sizeof(struct treeNode));
-    n7->addr->value = "aarya";
-    create_entry_and_insert(st,n7,REAL);
-
-    // struct treeNode* n1 = malloc(sizeof(struct treeNode));
-    // n1->addr->value = "stu";
-    // create_entry_and_insert(st,n1,NULL);
-
-    // struct treeNode* n1 = malloc(sizeof(struct treeNode));
-    // n1->addr->value = "abc";
-    // create_entry_and_insert(st,n1,NULL);
-
-    // struct treeNode* n1 = malloc(sizeof(struct treeNode));
-    // n1->addr->value = "abc";
-    // create_entry_and_insert(st,n1,NULL);
-
-    // struct treeNode* n1 = malloc(sizeof(struct treeNode));
-    // n1->addr->value = "abc";
-    // create_entry_and_insert(st,n1,NULL);
-
-
-    ST_ENTRY* temp = get_lexeme(st,"def");
-    if(temp==NULL){
-        printf("FAIL \n");
-        return 0;
-    }
-    printf("** %s ** \n",temp->id_lexeme);
-
-    return 0;
-}
+//     return 0;
+// }
 
 
 

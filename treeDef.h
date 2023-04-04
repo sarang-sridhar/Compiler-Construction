@@ -26,7 +26,7 @@ struct treeNode
     struct treeNode* prevSibling;
     struct treeNode* astnextSibling; //ast's next sibling
     struct treeNode* astprevSibling; //ast's prev sibling
-    union Variant tk_data;
+    //union Variant tk_data;
     int ruleNo;  
     struct treeNode* inh; //inherited attribute
     struct treeNode* syn; //synthesized attribute

@@ -3,43 +3,7 @@
 
 #define TABLE_SIZE 1619
 
-typedef struct node{
-    TYPE parameter_type;
-    char* parameter_name;
-    LISTNODE* next;
-}LISTNODE;
-
 enum primitiveDatatype{INTEGER,REAL,BOOLEAN};
-
-struct id_symbol_table{
-    ST_ENTRY *arr[TABLE_SIZE];
-    int nesting_value;
-    struct id_symbol_table* child_table;
-    struct id_symbol_table* parent_table;
-
-};
-
-struct fn_symbol_table{
-    FN_ENTRY* arr[TABLE_SIZE]; //fn entry created for future use
-    //aur kya aayega isme
-}
-
-typedef struct entry2{
-//i/p list
-    LISTNODE* ip_head;
-//o/p list
-    LISTNODE* op_head;
-    char* fn_name;
-    FN_ENTRY* next;
-}FN_ENTRY;
-
-
-
-typedef struct entry{
-    TYPE type;
-    char* id_lexeme;
-    ST_ENTRY* next;
-}ST_ENTRY;
 
 typedef union type{
     struct array{
@@ -51,16 +15,46 @@ typedef union type{
         union high_range{
             char* high_id;
             int end;
-        }
+        };
         //datatype
         enum primitiveDatatype arr_dt;
     };
-
     struct id{
         //datatype
         enum primitiveDatatype id_dt;
     };
-
-
 }TYPE;
+
+typedef struct node{
+    TYPE parameter_type;
+    char* parameter_name;
+    LISTNODE* next;
+}LISTNODE;
+
+typedef struct entry{
+    TYPE type;
+    char* id_lexeme;
+    ST_ENTRY* next;
+}ST_ENTRY;
+
+typedef struct entry2{
+//i/p list
+    LISTNODE* ip_head;
+//o/p list
+    LISTNODE* op_head;
+    char* fn_name;
+    FN_ENTRY* next;
+}FN_ENTRY;
+
+struct id_symbol_table{
+    ST_ENTRY *arr[TABLE_SIZE];
+    int nesting_value;
+    struct id_symbol_table* child_table;
+    struct id_symbol_table* parent_table;
+};
+
+struct fn_symbol_table{
+    FN_ENTRY* arr[TABLE_SIZE]; //fn entry created for future use
+    //aur kya aayega isme
+};
 

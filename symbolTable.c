@@ -1,5 +1,5 @@
 #include "symbolTable.h"
-#include<string.c>
+#include<string.h>
 #include<stdio.h>
 
 int get_sym_table_hash(char* str){
@@ -96,7 +96,7 @@ void create_entry_and_insert(struct id_symbol_table* table,struct treeNode* node
         return;
 }
 
-void create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct treeNode* node,LISTNODE* ip_list,LISTNODE* op_list){
+void create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct treeNode* node,LISTNODE* ip_list,LISTNODE* op_head){
         if(node==NULL){
             printf("AST Node:%s is null \n",node->value);
             return;
@@ -112,7 +112,7 @@ void create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct treeNod
 
 struct id_symbol_table* initST(int nesting_num){
     //use this fn to initialise ST after offset,scopes etc have been added
-    struct id_symbol_table* t = malloc(struct id_symbol_table);
+    struct id_symbol_table* t = malloc(sizeof(struct id_symbol_table));
     t->child_table=NULL;
     t->nesting_value = nesting_num;
     return t;

@@ -56,10 +56,16 @@ struct treeNode *makeNewNode(char *name, struct treeNode *list[], int count)
     // printf("NODE %s \n",name);
     strcpy(node->value, name);
     node->addr = NULL;
+    node->visited = 0;
     node->pair = NULL;
     node->next = NULL;
     node->astnextSibling = NULL;
     node->astprevSibling = NULL;
+    node->function_table_entry = NULL;
+    node->temp_variable_entry = NULL;
+    node->symbol_table_entry = NULL;
+    node->type_syn = NULL;
+    node->type_inh = NULL;
     // printf("\nafter strcpy\n");
     int i;
     node->children = list[0];
@@ -615,7 +621,8 @@ void createAST(struct treeNode *root)
             createAST(temp_child);
             if (!strcmp(temp_child->value, "ID"))
             {
-                root->addr = temp_child;
+                children[0] = temp_child;
+                root->addr = makeNewNode("GET-VALUE", children, 1);
             }
             break;
 
@@ -623,7 +630,10 @@ void createAST(struct treeNode *root)
             createAST(temp_child);
             if (!strcmp(temp_child->value, "print_var"))
             {
-                root->addr = temp_child->addr;
+                children[0] = temp_child->addr;
+                printf("HEY THERE\n");
+                root->addr = makeNewNode("PRINT", children, 1);
+                printf("HELLO WORLD\n");
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;
@@ -1612,14 +1622,14 @@ void createAST(struct treeNode *root)
 
             if (!strcmp(temp_child->value, "idList2"))
             {
-                children[count++] = temp_child->syn;
+                children[1] = temp_child->syn;
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;
             }
             else if (!strcmp(temp_child->value, "dataType"))
             {
-                children[count++] = temp_child->addr;
+                children[0] = temp_child->addr;
                 root->addr = makeNewNode("DECLARE", children, 2);
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);

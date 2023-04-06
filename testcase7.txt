@@ -1,4 +1,4 @@
 <<<driver program>>>
 start
-    use module sum with parameters v, w,-2,+4,true; 
+    get_value(v);
 end

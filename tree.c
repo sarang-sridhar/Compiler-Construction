@@ -11,11 +11,17 @@ void addChild(struct treeNode *parent, struct node *child)
 {
     struct treeNode *temp = malloc(sizeof(struct treeNode));
     strcpy(temp->value, child->value);
+    temp->visited = 0;
     temp->addr = NULL;
     temp->next = NULL;
     temp->pair = NULL;
     temp->astnextSibling = NULL;
     temp->astprevSibling = NULL;
+    temp->symbol_table_entry = NULL;
+    temp->temp_variable_entry = NULL;
+    temp->function_table_entry = NULL;
+    temp->type_inh = NULL;
+    temp->type_syn = NULL;
     // if(!child->isTerminal)
     //     strcpy(temp->tk_data.lexeme," ");
     temp->isTerminal = child->isTerminal;
@@ -36,6 +42,9 @@ void addChild(struct treeNode *parent, struct node *child)
         if (temp2->isTerminal)
             temp2->children = NULL;
         temp2->parent = parent;
+        temp2->visited = 0;
+        temp2->type_inh = NULL;
+        temp2->type_syn = NULL;
         temp2->prevSibling = temp;
         temp->nextSibling = temp2;
         temp = temp2;

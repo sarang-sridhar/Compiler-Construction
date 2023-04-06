@@ -18,6 +18,7 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 struct treeNode
 {
     int line_no;
+    int visited; //1 if visited, 0 if not visited
     char value[23]; //token name
     int isTerminal;
     struct treeNode* children;
@@ -33,6 +34,11 @@ struct treeNode
     struct treeNode* addr; //address attribute
     struct treeNode* next; //next node in list_type
     struct treeNode* pair; //pair node in list_type 
+    struct treeNode* type_syn; //syn attribute for type
+    struct treeNode* type_inh; //inh attribute for type
+    ST_ENTRY* temp_variable_entry;  
+    ST_ENTRY* symbol_table_entry; 
+    FN_ENTRY* function_table_entry; 
 };
 
 struct treeNode* root = NULL;

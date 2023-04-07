@@ -11,9 +11,9 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
     }
 
     // if there is no child (expression is either id/num/rnum/true/false) **array access has children and is handled below**
-    if (node->children == NULL || !strcmp(node->value, "U1_MINUS") || !strcmp(node->value, "U1_PLUS") || !strcmp(node->value, "U_MINUS") || !strcmp(node->value, "U_PLUS"))
-    {
-        if (!strcmp(node->value, "ID"))
+    if (node->children == NULL || !strcmpi(node->value, "U1_MINUS") || !strcmpi(node->value, "U1_PLUS") || !strcmpi(node->value, "U_MINUS") || !strcmpi(node->value, "U_PLUS") || !strcmpi(node->value,"ARRAY_ACCESS")) 
+    {   
+        if (!strcmpi(node->value, "ID"))
         {
             ST_ENTRY *temp = get_lexeme(table, node->tk_data.lexeme);
             char *datatype = temp->type.id_type.id_dt;
@@ -24,39 +24,86 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
                 printf("\n Expression cannot contain array type variable. ");
                 return -1;
             }
-            if (!strcmp(datatype, "INTEGER"))
+            if (!strcmpi(datatype, "INTEGER"))
             {
                 return 0;
             }
-            else if (!strcmp(datatype, "REAL"))
+            else if (!strcmpi(datatype, "REAL"))
             {
                 return 1;
             }
-            else if (!strcmp(datatype, "BOOLEAN"))
+            else if (!strcmpi(datatype, "BOOLEAN"))
             {
                 return 2;
             }
         }
-        if (!strcmp(node->value, "NUM"))
+        if (!strcmpi(node->value, "NUM"))
         {
             return 0;
         }
-        if (!strcmp(node->value, "RNUM"))
+        if (!strcmpi(node->value, "RNUM"))
         {
             return 1;
         }
-        if (!strcmp(node->value, "TRUE") || !strcmp(node->value, "FALSE"))
+        if (!strcmpi(node->value, "TRUE") || !strcmpi(node->value, "FALSE"))
         {
             return 2;
         }
-        if (!strcmp(node->value, "U1_MINUS") || !strcmp(node->value, "U1_PLUS"))
+        if (!strcmpi(node->value, "U1_MINUS") || !strcmpi(node->value, "U1_PLUS"))
         {
             return get_type(node->children->astnextSibling, table);
         }
-        if (!strcmp(node->value, "U_MINUS") || !strcmp(node->value, "U_PLUS"))
+        if (!strcmpi(node->value, "U_MINUS") || !strcmpi(node->value, "U_PLUS"))
         {
             return get_type(node->children->astnextSibling, table);
         }
+            if (!strcmpi(node->value, "ARRAY_ACCESS"))
+    {   
+        int ans;
+        ST_ENTRY *temp = get_lexeme(table, node->children->tk_data.lexeme);
+        if(temp==NULL)printf("Array not declared previously");
+        char *datatype;
+        datatype = temp->type.arr_type.arr_dt;
+        if (!strcmpi(datatype, "integer"))
+        {
+            ans = 0;
+        }
+        else if (!strcmpi(datatype, "real"))
+        {
+            ans = 1;
+        }
+        else if (!strcmpi(datatype, "boolean"))
+        {
+            ans = 2;
+        }
+        // check array bounds if array index is a num
+        int lr = temp->type.arr_type.lowRange.start;
+        int hr = temp->type.arr_type.highRange.end;
+        if (!strcmpi(node->children->astnextSibling->value, "NUM"))
+        {
+            int arr_index = node->children->astnextSibling->tk_data.val;
+            if (arr_index >= lr && arr_index < hr)
+            {
+                printf("\n Array index: %d falls in range, ans = %d ", node->children->astnextSibling->tk_data.val,ans);
+
+            }
+            else
+            {
+                printf("\n Array index: %d not in range ", node->children->astnextSibling->tk_data.val);
+                return -1;
+            }
+        }
+
+        // check array index type (should be integer)
+        int array_expr_type = get_type(node->children->astnextSibling, table);
+
+        if (array_expr_type != 0)
+        {
+            printf("\n Array index is not integer, at line no: %d", node->children->line_no);
+            return -1;
+        }
+        return ans;
+    }
     }
 
     // if there are 2 children of an operator node (left operand, right operand)
@@ -69,7 +116,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         return -1;
     }
 
-    if (!strcmp(node->value, "PLUS") || !strcmp(node->value, "MINUS"))
+    if (!strcmpi(node->value, "PLUS") || !strcmpi(node->value, "MINUS"))
     {
         if (leftOpType == 0 && rightOpType == 0)
         {
@@ -86,7 +133,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         }
     }
 
-    if (!strcmp(node->value, "DIV"))
+    if (!strcmpi(node->value, "DIV"))
     {
         if ((leftOpType == 0 && rightOpType == 0) || (leftOpType == 1 && rightOpType == 1) || (leftOpType == 0 && rightOpType == 1) || (leftOpType == 1 && rightOpType == 0))
         {
@@ -99,7 +146,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         }
     }
 
-    if (!strcmp(node->value, "MUL"))
+    if (!strcmpi(node->value, "MUL"))
     {
         if ((leftOpType == 1 && rightOpType == 1))
         {
@@ -115,7 +162,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
             return -1;
         }
     }
-    if (!strcmp(node->value, "AND") || !strcmp(node->value, "OR"))
+    if (!strcmpi(node->value, "AND") || !strcmpi(node->value, "OR"))
     {
         if (leftOpType == 2 && rightOpType == 2)
         {
@@ -127,7 +174,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
             return -1;
         }
     }
-    if (!strcmp(node->value, "LT") || !strcmp(node->value, "LE") || !strcmp(node->value, "GT") || !strcmp(node->value, "GE") || !strcmp(node->value, "EQ") || !strcmp(node->value, "NE"))
+    if (!strcmpi(node->value, "LT") || !strcmpi(node->value, "LE") || !strcmpi(node->value, "GT") || !strcmpi(node->value, "GE") || !strcmpi(node->value, "EQ") || !strcmpi(node->value, "NE"))
     {
         if ((leftOpType == 0 && rightOpType == 0) || (leftOpType == 1 && rightOpType == 1))
         {
@@ -138,50 +185,6 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
             printf("\n Incompatible relational op ");
             return -1;
         }
-    }
-
-    if (!strcmp(node->value, "ARRAY_ACCESS"))
-    {
-        ST_ENTRY *temp = get_lexeme(table, node->children->tk_data.lexeme);
-        char *datatype = temp->type.arr_type.arr_dt;
-        if (!strcmp(datatype, "INTEGER"))
-        {
-            ans = 0;
-        }
-        else if (!strcmp(datatype, "REAL"))
-        {
-            ans = 1;
-        }
-        else if (!strcmp(datatype, "BOOLEAN"))
-        {
-            ans = 2;
-        }
-        // check array bounds if array index is a num
-        int lr = temp->type.arr_type.lowRange.start;
-        int hr = temp->type.arr_type.highRange.end;
-        if (!strcmp(node->children->astnextSibling->value, "NUM"))
-        {
-            int arr_index = node->children->astnextSibling->tk_data.val;
-            if (arr_index >= lr && arr_index < hr)
-            {
-                printf("\n Array index: %d falls in range ", node->children->astnextSibling->tk_data.val);
-            }
-            else
-            {
-                printf("\n Array index: %d not in range ", node->children->astnextSibling->tk_data.val);
-                return -1;
-            }
-        }
-
-        // check array index type (should be integer)
-
-        int array_expr_type = get_type(node->children, table);
-        if (array_expr_type != 0)
-        {
-            printf("\n Array index is not integer, at line no: %d", node->children->line_no);
-            return -1;
-        }
-        return ans;
     }
 }
 
@@ -194,19 +197,19 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
     int lval;
     struct treeNode *lchild = root->children;
 
-    if (!strcmp(root->value, "LVALUEID"))
+    if (!strcmpi(root->value, "LVALUEID"))
     { // lchild will be id
         ST_ENTRY *temp = get_lexeme(table, lchild->tk_data.lexeme);
         char *datatype = temp->type.id_type.id_dt;
-        if (!strcmp(datatype, "INTEGER"))
+        if (!strcmpi(datatype, "INTEGER"))
         {
             lval = 0;
         }
-        else if (!strcmp(datatype, "REAL"))
+        else if (!strcmpi(datatype, "REAL"))
         {
             lval = 1;
         }
-        else if (!strcmp(datatype, "BOOLEAN"))
+        else if (!strcmpi(datatype, "BOOLEAN"))
         {
             lval = 2;
         }
@@ -222,19 +225,19 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
             return -1;
         }
     }
-    else if (!strcmp(root->value, "LVALUEARRAY"))
+    else if (!strcmpi(root->value, "LVALUEARRAY"))
     { // lchild will be array access
         ST_ENTRY *temp = get_lexeme(table, lchild->children->tk_data.lexeme);
         char *datatype = temp->type.arr_type.arr_dt;
-        if (!strcmp(datatype, "INTEGER"))
+        if (!strcmpi(datatype, "INTEGER"))
         {
             lval = 0;
         }
-        else if (!strcmp(datatype, "REAL"))
+        else if (!strcmpi(datatype, "REAL"))
         {
             lval = 1;
         }
-        else if (!strcmp(datatype, "BOOLEAN"))
+        else if (!strcmpi(datatype, "BOOLEAN"))
         {
             lval = 2;
         }
@@ -295,7 +298,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         }
 
         ST_ENTRY *op_entry = get_lexeme(table, called_op_list->tk_data.lexeme);
-        if (strcmp(defined_op_list->parameter_type.id_type.id_dt, op_entry->type.id_type.id_dt)) // if comparison results in non 0 meaning both arent the same hence error
+        if (strcmpi(defined_op_list->parameter_type.id_type.id_dt, op_entry->type.id_type.id_dt)) // if comparison results in non 0 meaning both arent the same hence error
         {
             comparison_flag_type_checking = 1;
             printf("\n type doesnt match in function call, line no: %d \n", root->line_no);
@@ -326,17 +329,17 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         // Flag to choose which struct to access to obtain type
         int flag_for_type = 1; // 1- to access id struct, 2 to access array struct
 
-        if (!strcmp(called_ip_list->children->value, "ARRAY_ACCESS"))
+        if (!strcmpi(called_ip_list->children->value, "ARRAY_ACCESS"))
         {
             flag_for_type = 2;
         }
-        if (flag_for_type == 1 && strcmp(defined_ip_list->parameter_type.id_type.id_dt, ip_entry->type.id_type.id_dt)) // if comparison results in non 0 meaning both arent the same hence error
+        if (flag_for_type == 1 && strcmpi(defined_ip_list->parameter_type.id_type.id_dt, ip_entry->type.id_type.id_dt)) // if comparison results in non 0 meaning both arent the same hence error
         {
             comparison_flag_type_checking = 1;
             printf("\n type doesnt match in function call, line no: %d \n", root->line_no);
             return -1;
         }
-        else if (flag_for_type == 2 && strcmp(defined_ip_list->parameter_type.arr_type.arr_dt, ip_entry->type.arr_type.arr_dt)) // if comparison results in non 0 meaning both arent the same hence error
+        else if (flag_for_type == 2 && strcmpi(defined_ip_list->parameter_type.arr_type.arr_dt, ip_entry->type.arr_type.arr_dt)) // if comparison results in non 0 meaning both arent the same hence error
         {
             comparison_flag_type_checking = 1;
             printf("\n type doesnt match in function call, line no: %d \n", root->line_no);
@@ -372,14 +375,14 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
     ST_ENTRY *temp = get_lexeme(table, switch_id->tk_data.lexeme);
     char *datatype = temp->type.id_type.id_dt;
     int switch_type;
-    if (!strcmp(datatype, "REAL"))
+    if (!strcmpi(datatype, "REAL"))
     {
         printf("\n Switch case cant have real value ");
         return -1;
     }
     else
     {
-        if (!strcmp(datatype, "INTEGER"))
+        if (!strcmpi(datatype, "INTEGER"))
         {
             switch_type = 0;
         }
@@ -391,7 +394,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
 
         while (caseList != NULL)
         {
-            if (!strcmp(caseList->value, "NUM"))
+            if (!strcmpi(caseList->value, "NUM"))
             {
                 if ((switch_type == 0))
                 {
@@ -403,7 +406,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
                     return -1;
                 }
             }
-            else if (!strcmp(caseList->value, "TRUE") || !strcmp(caseList->value, "FALSE"))
+            else if (!strcmpi(caseList->value, "TRUE") || !strcmpi(caseList->value, "FALSE"))
             {
                 if (switch_type == 2)
                 {
@@ -454,7 +457,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
     else
     {
         // check for respective nodes
-        if (!strcmp(root->value, "MODULE_DEF"))
+        if (!strcmpi(root->value, "MODULE_DEF"))
         {
             // check for pair
             struct treeNode *child1 = root->children;         // ID
@@ -526,17 +529,17 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
 
             }
         }
-        else if (!strcmp(root->value, "FOR"))
+        else if (!strcmpi(root->value, "FOR"))
         {
             TYPE type;
             struct treeNode *rangeNode = root->children->astnextSibling;
-            if (!strcmp(rangeNode->children->children->value, "NUM"))
+            if (!strcmpi(rangeNode->children->children->value, "NUM"))
             {
                 type.for_type.low_range = rangeNode->children->children->tk_data.val;
             }
             else
             {
-                if (!strcmp(rangeNode->children->children->value, "MINUS"))
+                if (!strcmpi(rangeNode->children->children->value, "MINUS"))
                 {
                     type.for_type.low_range = -1 * (rangeNode->children->children->astnextSibling->tk_data.val);
                 }
@@ -546,13 +549,13 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 }
             }
 
-            if (!strcmp(rangeNode->children->astnextSibling->children->value, "NUM"))
+            if (!strcmpi(rangeNode->children->astnextSibling->children->value, "NUM"))
             {
                 type.for_type.high_range = rangeNode->children->astnextSibling->children->tk_data.val;
             }
             else
             {
-                if (!strcmp(rangeNode->children->astnextSibling->children->value, "MINUS"))
+                if (!strcmpi(rangeNode->children->astnextSibling->children->value, "MINUS"))
                 {
                     type.for_type.high_range = -1 * (rangeNode->children->astnextSibling->children->astnextSibling->tk_data.val);
                 }
@@ -580,20 +583,94 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 temp->right_sibling = child_table;
             }
             id_table = child_table;
+
+
+            // Rule is iterativeStmt.addr = make_new_node("FOR",ID.addr ,range_for.addr,statements.syn);
+            struct treeNode* child1= root->children;
+            struct treeNode* statements = root->children->astnextSibling->astnextSibling;
+            int flag_for_for_in_semantic_analysis = 1;
+            while(statements!=NULL && flag_for_for_in_semantic_analysis){
+                if(!strcmpi(statements->value, "LVALUEID")){
+                    if(!strcmpi(statements->children->tk_data.lexeme,child1->tk_data.lexeme)){
+                        printf("\n error- A for statement must not redefine the variable that participates in the iterating over the range, line no %d ",statements->children->line_no);
+                        flag_for_for_in_semantic_analysis=0;
+                        exit(1);
+                    }
+                }
+                statements = statements->next;
+            }
         }
-        else if (!strcmp(root->value, "DECLARE"))
+        else if (!strcmpi(root->value, "DECLARE"))
         {
             struct treeNode *type_attribute = root->children;
             struct treeNode *idList = root->children->astnextSibling;
             TYPE t;
-            t.id_type.id_dt = type_attribute->value;
+            if(!strcmpi(type_attribute->value,"ARRAY-DCL")){
+                t.arr_type.arr_dt = type_attribute->children->astnextSibling->tk_data.lexeme;
+                struct treeNode* li = type_attribute->children->children;
+                struct treeNode* ri = li->astnextSibling;
+        if(!strcmpi(li->children->value,"ID")){
+            t.arr_type.lowRange.low_id = li->children->tk_data.lexeme;
+            t.arr_type.isStatic = 0; //dynamic array
+        }
+        else if(!strcmpi(li->children->value,"NUM")){
+            t.arr_type.lowRange.start = li->children->tk_data.val;
+            t.arr_type.isStatic = 1; //static array
+        }
+        else{
+            if(!strcmpi(li->children->astnextSibling->value,"ID"))
+            {
+                   t.arr_type.lowRange.low_id = strcat(strcat(li->children->value,","),li->children->astnextSibling->tk_data.lexeme);
+                   t.arr_type.isStatic = 0; //dynamic array
+            }
+            else
+            {
+                if(!strcmpi(li->children->value,"MINUS"))
+                    t.arr_type.lowRange.start = -1*li->children->astnextSibling->tk_data.val;
+                else   
+                    t.arr_type.lowRange.start = li->children->astnextSibling->tk_data.val;
+                t.arr_type.isStatic = 1; //static array
+            }
+        }
+        
+        // ri //
+        if(!strcmpi(ri->children->value,"ID")){
+            t.arr_type.highRange.high_id = ri->children->tk_data.lexeme;
+            t.arr_type.isStatic = 0; //dynamic array
+        }
+        else if(!strcmpi(ri->children->value,"NUM")){
+            t.arr_type.highRange.end = ri->children->tk_data.val;
+            t.arr_type.isStatic = 1; //static array
+        }
+        else{
+            if(!strcmpi(ri->children->astnextSibling->value,"ID"))
+            {
+                   t.arr_type.highRange.high_id = strcat(strcat(ri->children->value,","),ri->children->astnextSibling->tk_data.lexeme);
+                   t.arr_type.isStatic = 0; //dynamic array
+            }
+            else
+            {
+                if(!strcmpi(ri->children->value,"MINUS"))
+                    t.arr_type.highRange.end = -1*ri->children->astnextSibling->tk_data.val;
+                else   
+                    t.arr_type.highRange.end = ri->children->astnextSibling->tk_data.val;
+                t.arr_type.isStatic = 1; //static array
+            }
+        }
+        
+            }
+            else{
+                t.id_type.id_dt = type_attribute->value;
+                 printf("ID me populate:%s ",t.id_type.id_dt);
+            }
+            
             while (idList != NULL)
             {
                 create_entry_and_insert(id_table, idList, t);
                 idList = idList->next;
             }
         }
-        else if (!strcmp(root->value, "WHILE"))
+        else if (!strcmpi(root->value, "WHILE"))
         {
             type_check = check_while(root, id_table); // checks if while has a boolean expr
             if (type_check == -1)
@@ -619,7 +696,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             id_table = child_table;
         }
 
-        else if (!strcmp(root->value, "SWITCH"))
+        else if (!strcmpi(root->value, "SWITCH"))
         {
             type_check = check_switch_case(root, id_table); // checks if while has a boolean expr
             if (type_check == -1)
@@ -680,7 +757,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             id_table = child_table;
         }
 
-        else if (!strcmp(root->value, "LVALUEID") || !strcmp(root->value, "LVALUEARR"))
+        else if (!strcmpi(root->value, "LVALUEID") || !strcmpi(root->value, "LVALUEARR"))
         {          
 
             type_check = check_assignment(root, id_table);
@@ -698,7 +775,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 int found_entry_for_assign_op = 1;
                 while (temp && found_entry_for_assign_op)
                 {
-                    if (!strcmp(temp->id_lexeme, root->children->tk_data.lexeme))
+                    if (!strcmpi(temp->id_lexeme, root->children->tk_data.lexeme))
                     {
                         temp->is_used = 1;
                         found_entry_for_assign_op = 0;
@@ -708,24 +785,10 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             }
         }
         // Checking if variable in for is assigned value anywhere inside loop
-        else if (!strcmp(root->value,"FOR")){
-            // Rule is iterativeStmt.addr = make_new_node("FOR",ID.addr ,range_for.addr,statements.syn);
-            struct treeNode* child1= root->children;
-            struct treeNode* statements = root->children->astnextSibling->astnextSibling;
-            int flag_for_for_in_semantic_analysis = 1;
-            while(statements!=NULL && flag_for_for_in_semantic_analysis){
-                if(!strcmp(statements->value, "LVALUEID")){
-                    if(!strcmp(statements->children->tk_data.lexeme,child1->tk_data.lexeme)){
-                        printf("\n error- A for statement must not redefine the variable that participates in the iterating over the range, line no %d",root->line_no);
-                        flag_for_for_in_semantic_analysis=0;
-                    }
-                }
-                statements = statements->next;
-            }
-        }
+        
 
         // function call
-        else if (!strcmp(root->value, "MODULE-INVOKE"))
+        else if (!strcmpi(root->value, "MODULE-INVOKE"))
         {
             type_check = check_function_call(root, id_table);
             if (type_check == -1)

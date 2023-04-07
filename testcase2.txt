@@ -1,7 +1,9 @@
 <<<driver program>>>
 start
-declare x:integer;
-declare y:boolean;
-declare z:integer;
+declare x:real;
+declare y:real;
+declare z:real;
+declare A:array [1..15] of real;
 x:=y+z;
+x:=A[3];
 end

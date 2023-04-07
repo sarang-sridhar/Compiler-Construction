@@ -1,4 +1,3 @@
-#include "symbolTable.h"
 #include "treeDef.h"
 #include<string.h>
 #include<stdio.h>
@@ -124,8 +123,8 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
 
 FN_ENTRY* create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct treeNode* node,LISTNODE* ip_list,LISTNODE* op_list){
         if(node==NULL){
-            printf("AST Node:%s is null \n",node->value);
-            return;
+            printf("AST Node:%s is null inside create entry in FST \n",node->value);
+            return NULL;
         }
         FN_ENTRY* temp_entry = get_func_name(table,node->tk_data.lexeme);
         if(temp_entry!=NULL){

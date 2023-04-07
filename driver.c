@@ -10,7 +10,7 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 #include "parser.c"
 #include "ast.c"
 #include "semanticAnalysis.c"
-#include <time.h>
+#include<time.h>
 
 void removeComments(char *name)
 {
@@ -96,7 +96,7 @@ void print_choices()
     printf("\n 3. Print parse tree in text file :");
     printf("\n 4. Print total time taken by the stage 1 code:");
     printf("\n 5. Print AST in text file :\n *********** \n");
-    printf("\n 5. Semantic Analysis :\n *********** \n");
+    printf("\n 6. Semantic Analysis :\n *********** \n");
 
 }
 

@@ -1,3 +1,7 @@
 <<<driver program>>>
 start
+declare x:integer;
+declare y:boolean;
+declare z:integer;
+x:=y+z;
 end

@@ -11,6 +11,7 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 #include<ctype.h>
 #include<stdlib.h>
 #include<string.h>
+#include "symbolTable.h"
 // error ka karan ban sakta hai
 //#include "lexerDef.h"
 

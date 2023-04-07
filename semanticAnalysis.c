@@ -7,7 +7,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
 {
     if (node == NULL)
     {
-        return;
+        printf("\n Node null inside get_type");
     }
 
     // if there is no child (expression is either id/num/rnum/true/false) **array access has children and is handled below**
@@ -175,7 +175,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
 
         // check array index type (should be integer)
 
-        int array_expr_type = get_type(node->children->tk_data.lexeme, table);
+        int array_expr_type = get_type(node->children, table);
         if (array_expr_type != 0)
         {
             printf("\n Array index is not integer, at line no: %d", node->children->line_no);
@@ -189,7 +189,7 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
 {
     if (root == NULL)
     {
-        return;
+        printf("\n root null inside check_assignment"); 
     }
     int lval;
     struct treeNode *lchild = root->children;
@@ -224,7 +224,7 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
     }
     else if (!strcmp(root->value, "LVALUEARRAY"))
     { // lchild will be array access
-        ST_ENTRY *temp = get_lexeme(table, lchild->children);
+        ST_ENTRY *temp = get_lexeme(table, lchild->children->tk_data.lexeme);
         char *datatype = temp->type.arr_type.arr_dt;
         if (!strcmp(datatype, "INTEGER"))
         {

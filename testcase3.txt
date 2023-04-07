@@ -15,3 +15,5 @@ returns [value:integer];
 start
 	value:= x*x;
 end
+
+

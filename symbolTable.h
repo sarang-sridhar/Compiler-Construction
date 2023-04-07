@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "ast.c"
+
 #define TABLE_SIZE 1619
 
 typedef struct entry2 FN_ENTRY;
@@ -7,12 +7,6 @@ typedef struct entry ST_ENTRY;
 typedef struct listnode LISTNODE;
 
 int isFirstChild = 1; //1 for first child, 0 for others
-enum primitiveDatatype
-{
-    INTEGER,
-    REAL,
-    BOOLEAN
-};
 
 struct for_loop{
     // char* id_name; not required

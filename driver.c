@@ -9,6 +9,7 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 // #include "lexer.c"
 #include "parser.c"
 #include "ast.c"
+#include "semanticAnalysis.c"
 #include <time.h>
 
 void removeComments(char *name)
@@ -95,6 +96,8 @@ void print_choices()
     printf("\n 3. Print parse tree in text file :");
     printf("\n 4. Print total time taken by the stage 1 code:");
     printf("\n 5. Print AST in text file :\n *********** \n");
+    printf("\n 5. Semantic Analysis :\n *********** \n");
+
 }
 
 void totalTime()
@@ -515,6 +518,14 @@ int main(int argc, char *argv[])
             printf("%s\n", root->value);
             printParseTree(root, stdout);
             break;
+        case 6:
+            createAST(root);
+            if(root==NULL) printf("ROOT IS NULL\n");
+            else{
+                struct id_symbol_table* initial_table = initST(0);
+                semanticAnalysis(root,initial_table,0);
+            }
+            break;
         default:
             printf("\n choose one of the given options\n");
             break;
@@ -523,5 +534,8 @@ int main(int argc, char *argv[])
         free(buff2);
         print_choices();
         scanf("%d", &option);
+
+        
     }
+
 }

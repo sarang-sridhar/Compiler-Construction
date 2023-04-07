@@ -1,4 +1,5 @@
 #include "symbolTable.h"
+#include "treeDef.h"
 #include<string.h>
 #include<stdio.h>
 
@@ -56,6 +57,7 @@ void insert_in_table(struct id_symbol_table* table,  ST_ENTRY * entry){
 FN_ENTRY* get_func_name(struct fn_symbol_table* table, char* str){
     int hash_value= get_sym_table_hash(str);
     if(table->arr[hash_value]==NULL){
+        printf("Error: Function %s not declared \n",str);
         return NULL;
     }
     else{
@@ -66,36 +68,55 @@ FN_ENTRY* get_func_name(struct fn_symbol_table* table, char* str){
             }
             temp = temp->next;
         }
+        printf("Error: Function %s not declared \n",str);
         return NULL;
     }
 }
 
 ST_ENTRY* get_lexeme(struct id_symbol_table* table, char* str){
     int hash_value= get_sym_table_hash(str);
-    if(table->arr[hash_value]==NULL){
-        return NULL;
-    }
-    else{
-        ST_ENTRY* temp = table->arr[hash_value];
-        while(temp){
-            if(!strcmp(temp->id_lexeme,str)){
-                return temp;
+    struct id_symbol_table* temp_table = table;
+    while(temp_table!=NULL){
+        if(temp_table->arr[hash_value]!=NULL){
+            ST_ENTRY* temp = temp_table->arr[hash_value];
+            while(temp){
+                if(!strcmp(temp->id_lexeme,str)){
+                    return temp;
+                }
+                temp = temp->next;
             }
-            temp = temp->next;
         }
-        return NULL;
+        temp_table = temp_table->parent_table;
     }
+    printf("Error: Variable %s not declared \n",str);
+    return NULL;
 }
 
 ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode* node,TYPE t1){
         if(node==NULL){
             printf("AST Node:%s is null \n",node->value);
-            return;
+            return NULL;
         }
+
+        int hash_value= get_sym_table_hash(node->tk_data.lexeme);
+        if(table->arr[hash_value]!=NULL){
+            ST_ENTRY* temp = table->arr[hash_value];
+            while(temp){
+                if(!strcmp(temp->id_lexeme,node->tk_data.lexeme)){
+                    printf("Error: Redeclaration of variable %s \n",node->tk_data.lexeme);
+                    return NULL;
+                }
+                temp = temp->next;
+            }
+        }
+
+        
+
         ST_ENTRY* temp = malloc(sizeof(ST_ENTRY));
         temp->id_lexeme = node->tk_data.lexeme;
         temp->next = NULL;
         temp->type = t1;
+
         insert_in_table(table,temp);
         node->symbol_table_entry=temp;
         return temp;
@@ -105,6 +126,11 @@ FN_ENTRY* create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct tr
         if(node==NULL){
             printf("AST Node:%s is null \n",node->value);
             return;
+        }
+        FN_ENTRY* temp_entry = get_func_name(table,node->tk_data.lexeme);
+        if(temp_entry!=NULL){
+            printf("Error: Redeclaration of function %s \n",node->tk_data.lexeme);
+            return NULL;
         }
         FN_ENTRY* temp = malloc(sizeof(FN_ENTRY));
         temp->ip_head = ip_list;
@@ -266,6 +292,3 @@ LISTNODE* makeListNode(struct treeNode* head){
 
 //     return 0;
 // }
-
-
-

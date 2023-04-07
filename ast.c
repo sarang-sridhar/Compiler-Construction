@@ -1638,18 +1638,22 @@ void createAST(struct treeNode *root)
             break;
 
         case 122:
+            //koi error aaye to check this thing first
             createAST(temp_child);
             if (!strcmp(temp_child->value, "caseStmt"))
             {
-                children[0] = temp_child->syn;
+                children[1] = temp_child->syn;
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;
             }
+            else if(!strcmp(temp_child->value,"ID")){
+                children[0] = temp_child;
+            }
             else if (!strcmp(temp_child->value, "default"))
             {
-                children[1] = temp_child->syn; 
-                root->addr = makeNewNode("SWITCH",children,2);
+                children[2] = temp_child->syn; 
+                root->addr = makeNewNode("SWITCH",children,3);
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;

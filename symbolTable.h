@@ -77,6 +77,7 @@ struct entry2
 
 struct entry
 {
+    int is_used;
     int offset;
     TYPE type;
     char *id_lexeme;

@@ -233,7 +233,7 @@ b)free(iterativeStmt);
 ={//bottom up
 a)free(GET_VALUE);
 b)free(BO)
-c)ioStmt.addr = ID.addr;
+c)ioStmt.addr = make_new_node(“GET-VALUE”,ID.addr);
 d)free(BC);
 e)free(SEMICOL);
 }
@@ -241,7 +241,7 @@ e)free(SEMICOL);
 ={//bottom up
    a)free(PRINT);
    b)free(BO)
-   c)ioStmt.addr = print_var.addr;
+   c)ioStmt.addr = make_new_node(“PRINT”,print_var.addr);
    d)free(print_var);
    e) free(BC);
    f)free(SEMICOL);
@@ -503,7 +503,7 @@ c)free(ASSIGNOP) //bottom up
 80)moduleReuseStmt,optional,USE,MODULE,ID,WITH,PARAMETERS,idList,SEMICOL
 =
 {
-a)moduleReuseStmt=make_new_node(“MODULE-INVOKE”,ID.addr,(make_new_node(“ARGUMENTS”,optional.syn,idList.syn)); //bottom up
+a)moduleReuseStmt=make_new_node(“MODULE-INVOKE”,ID.addr,(make_new_node(“ARGUME	NTS”,optional.syn,idList.syn)); //bottom up
 b)free(USE); //bottom up
 c)free(MODULE); //bottom up
 d)free(WITH); //bottom up
@@ -511,7 +511,7 @@ e)free(PARAMETERS); //bottom up
 f)free(SEMICOL); //bottom up
 g)free(optional);
 h)free(idList);
-
+}
 81)optional,SQBO,idList2,SQBC,ASSIGNOP 
 ={//bottom up
 a)optional.syn = idList2.syn; //bottom up
@@ -534,7 +534,6 @@ b)free(EPSILON);
 }
 84)moreId,COMMA,actualParameter,moreId1
 ={ //bottom up
-
 a)free(COMMA);
 b)moreId.syn =  insert_at_beginning(moreId1.syn,actualParameter.addr);
 c)free(actualparameter);
@@ -753,7 +752,7 @@ b)free(COLON)
 	b)free(BO);
 	c)free(BC);
 	d)free(START);
-	e)conditionalStmt.syn = make_new_node(“SWITCH”,caseStmt.syn,default.syn);
+	e)conditionalStmt.syn = make_new_node(“SWITCH”,ID.addr,caseStmt.syn,default.syn);
 	f)free(END);
 	g)free(caseStmt);
 	h)free(default);

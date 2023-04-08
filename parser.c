@@ -11,6 +11,7 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 #include "stackAdt.c"
 
 //hash function for terminals and non-terminals
+void runPDA();
 int get_hash(const char *s)
 {
     int n = strlen(s);

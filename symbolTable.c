@@ -56,7 +56,7 @@ void insert_in_table(struct id_symbol_table* table,  ST_ENTRY * entry){
 FN_ENTRY* get_func_name(struct fn_symbol_table* table, char* str){
     int hash_value= get_sym_table_hash(str);
     if(table->arr[hash_value]==NULL){
-        printf("Error: Function %s not declared \n",str);
+        printf("1. Error: Function %s not declared \n",str);
         return NULL;
     }
     else{
@@ -67,7 +67,7 @@ FN_ENTRY* get_func_name(struct fn_symbol_table* table, char* str){
             }
             temp = temp->next;
         }
-        printf("Error: Function %s not declared \n",str);
+        printf("2. Error: Function %s not declared \n",str);
         return NULL;
     }
 }
@@ -96,19 +96,56 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
             printf("AST Node:%s is null \n",node->value);
             return NULL;
         }
+        int redeclare_flag = 0;
 
         int hash_value= get_sym_table_hash(node->tk_data.lexeme);
         if(table->arr[hash_value]!=NULL){
             ST_ENTRY* temp = table->arr[hash_value];
             while(temp){
                 if(!strcmp(temp->id_lexeme,node->tk_data.lexeme)){
-                    printf("Error: Redeclaration of variable %s \n",node->tk_data.lexeme);
-                    return NULL;
+                    if(table->parent_function!=NULL){
+                        LISTNODE* temp_list = table->parent_function->ip_head;
+                        while(temp_list){
+                            if(!strcmp(temp_list->parameter_name,node->tk_data.lexeme)){
+                                redeclare_flag = 1;
+                                break;
+                            }
+                            temp_list = temp_list->next;
+                        }
+                    }
+                    if(redeclare_flag==0){
+                        printf("Error: Redeclaration of variable %s \n",node->tk_data.lexeme);
+                        return NULL;
+                    }
                 }
                 temp = temp->next;
             }
         }
 
+        if(redeclare_flag==1){
+            ST_ENTRY* element_to_be_deleted = table->arr[hash_value];
+            ST_ENTRY* prev = element_to_be_deleted;
+            while(element_to_be_deleted!=NULL){
+                if(!strcasecmp(node->tk_data.lexeme,element_to_be_deleted->id_lexeme)){
+                    if(prev==element_to_be_deleted){
+                        ST_ENTRY* temp = malloc(sizeof(ST_ENTRY));
+                        temp->id_lexeme = node->tk_data.lexeme;
+                        temp->next = element_to_be_deleted->next;
+                        temp->type = t1;
+                        table->arr[hash_value] = temp;
+                        node->symbol_table_entry = temp;
+                        printf("\nEntry done for %s \n",node->tk_data.lexeme);
+                        return temp;
+                    }
+                    else{
+                        prev->next = element_to_be_deleted->next;
+                        element_to_be_deleted->next = NULL;
+                    }
+                }
+                prev = element_to_be_deleted;
+                element_to_be_deleted=element_to_be_deleted->next;
+            }
+        }
         
 
         ST_ENTRY* temp = malloc(sizeof(ST_ENTRY));
@@ -118,6 +155,7 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
 
         insert_in_table(table,temp);
         node->symbol_table_entry=temp;
+        printf("\nEntry done for %s \n",node->tk_data.lexeme);
         return temp;
 }
 
@@ -126,11 +164,24 @@ FN_ENTRY* create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct tr
             printf("AST Node:%s is null inside create entry in FST \n",node->value);
             return NULL;
         }
-        FN_ENTRY* temp_entry = get_func_name(table,node->tk_data.lexeme);
-        if(temp_entry!=NULL){
-            printf("Error: Redeclaration of function %s \n",node->tk_data.lexeme);
-            return NULL;
+        // FN_ENTRY* temp_entry = get_func_name(table,node->tk_data.lexeme);
+        // if(temp_entry!=NULL){
+        //     printf("Error: Redeclaration of function %s \n",node->tk_data.lexeme);
+        //     return NULL;
+        // }
+
+        int hash_value= get_sym_table_hash(node->tk_data.lexeme);
+        if(table->arr[hash_value]!=NULL){
+            FN_ENTRY* temp = table->arr[hash_value];
+            while(temp){
+                if(!strcmp(temp->fn_name,node->tk_data.lexeme)){
+                    printf("Error: Redeclaration of variable %s \n",node->tk_data.lexeme);
+                    return NULL;
+                }
+                temp = temp->next;
+            }
         }
+
         FN_ENTRY* temp = malloc(sizeof(FN_ENTRY));
         temp->ip_head = ip_list;
         temp->op_head = op_list;
@@ -165,13 +216,14 @@ struct fn_symbol_table* initFST(){
     return t;
 }
 
-LISTNODE* makeListNode(struct treeNode* head){
+LISTNODE* makeListNode(struct treeNode* head){  
     if(head == NULL)
         return NULL;
     LISTNODE* temp = malloc(sizeof(LISTNODE));
     temp->parameter_name = head->tk_data.lexeme;    
     if(!strcmp(head->pair->value,"ARRAY-DCL")){
         temp->parameter_type.arr_type.arr_dt = head->pair->children->astnextSibling->value;
+        temp->is_array=1;
         struct treeNode* li = head->pair->children->children;
         struct treeNode* ri = head->pair->children->children->astnextSibling;
         // li //
@@ -227,6 +279,7 @@ LISTNODE* makeListNode(struct treeNode* head){
     }
     else{
         //normal ID
+        temp->is_array=0;
         temp->parameter_type.id_type.id_dt = head->pair->value; 
     }
     temp->next = makeListNode(head->next);
@@ -234,7 +287,12 @@ LISTNODE* makeListNode(struct treeNode* head){
 }
 
 
-// int main(){
+//  int main(){
+//     struct fn_symbol_table* fst = initFST(1);
+//     printf("\n init success");
+
+//     struct treeNode* n1 = malloc(sizeof(struct treeNode));
+//     n1->tk_data.val=2;
 //     struct id_symbol_table* st = initST(1);
 //     printf("\ninit success \n");
 
@@ -289,5 +347,5 @@ LISTNODE* makeListNode(struct treeNode* head){
 //     }
 //     printf("** %s ** \n",temp->id_lexeme);
 
-//     return 0;
-// }
+//      return 0;
+//  }

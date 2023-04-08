@@ -1,0 +1,10 @@
+<<<driver program>>>
+start
+declare a:boolean;
+a:=true;
+for(k in 1..3)
+start
+declare k:integer;
+end
+end
+

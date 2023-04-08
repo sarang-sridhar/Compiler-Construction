@@ -51,7 +51,7 @@ typedef union type
 } TYPE;
 
 struct listnode
-{
+{   int is_array;
     TYPE parameter_type;
     char *parameter_name;
     LISTNODE *next;
@@ -72,6 +72,7 @@ struct entry2
 struct entry
 {
     int is_used;
+    int is_array; // 0- not array 1-array
     int offset;
     TYPE type;
     char *id_lexeme;

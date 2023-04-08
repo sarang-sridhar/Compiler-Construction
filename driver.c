@@ -95,8 +95,9 @@ void print_choices()
     printf("\n 2. Print token list on terminal");
     printf("\n 3. Print parse tree in text file :");
     printf("\n 4. Print total time taken by the stage 1 code:");
-    printf("\n 5. Print AST in text file :\n *********** \n");
-    printf("\n 6. Semantic Analysis :\n *********** \n");
+    printf("\n 5. Print AST in text file :");
+    printf("\n 6. Semantic Analysis :");
+    printf("\n******\n");
 
 }
 
@@ -520,6 +521,7 @@ int main(int argc, char *argv[])
             break;
         case 6:
             createAST(root);
+            fn_table = initFST(0);
             if(root==NULL) printf("ROOT IS NULL\n");
             else{
                 struct id_symbol_table* initial_table = initST(0);
@@ -533,9 +535,7 @@ int main(int argc, char *argv[])
         free(buff1);
         free(buff2);
         print_choices();
-        scanf("%d", &option);
-
-        
+        scanf("%d", &option);    
     }
 
 }

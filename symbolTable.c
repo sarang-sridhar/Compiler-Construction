@@ -78,7 +78,7 @@ ST_ENTRY* get_lexeme(struct id_symbol_table* table, char* str){
     while(temp_table!=NULL){
         if(temp_table->arr[hash_value]!=NULL){
             ST_ENTRY* temp = temp_table->arr[hash_value];
-            while(temp){
+            while(temp!=NULL){
                 if(!strcmp(temp->id_lexeme,str)){
                     return temp;
                 }
@@ -86,8 +86,9 @@ ST_ENTRY* get_lexeme(struct id_symbol_table* table, char* str){
             }
         }
         temp_table = temp_table->parent_table;
+        
     }
-    printf("Error: Variable %s not declared \n",str);
+    printf("\nError: Variable %s not declared \n",str);
     return NULL;
 }
 

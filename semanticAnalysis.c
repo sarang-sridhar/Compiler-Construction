@@ -8,6 +8,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
     if (node == NULL)
     {
         printf("\n Node null inside get_type");
+        
     }
 
     // if there is no child (expression is either id/num/rnum/true/false) **array access has children and is handled below**
@@ -15,12 +16,18 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
     {   
         if (!strcasecmp(node->value, "ID"))
         {
+            printf("\n**get lexeme called for:%s \n",node->tk_data.lexeme);
             ST_ENTRY *temp = get_lexeme(table, node->tk_data.lexeme);
+           
+            printf("\n**get lexeme after call for:%s \n",temp->id_lexeme);
             if(temp==NULL){
+                printf("ID IS NULL");
                 return -1;
             }
+            printf("\n HEre before type\n");
             char *datatype = temp->type.id_type.id_dt;
-
+            printf("\nTYPE is:%s \n",datatype);
+            printf("\nHERE AFTER PRINTING TYPE\n");
             // id should not be of array type
             if (strlen(datatype) == 0)
             {
@@ -65,7 +72,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
     {   
         int ans;
         ST_ENTRY *temp = get_lexeme(table, node->children->tk_data.lexeme);
-        if(temp==NULL)printf("Array not declared previously");
+        if(temp==NULL){return -1;}
         char *datatype;
         datatype = temp->type.arr_type.arr_dt;
         if (!strcasecmp(datatype, "integer"))
@@ -122,17 +129,20 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
 
     if (!strcasecmp(node->value, "PLUS") || !strcasecmp(node->value, "MINUS"))
     {
+        printf("being plus \n");
         if (leftOpType == 0 && rightOpType == 0)
         {
-            printf("correct %s",node->value);
+            printf("correct %s\n",node->value);
             return 0;
         }
         if (leftOpType == 1 && rightOpType == 1)
         {
+            printf(" sahi hai \n");
             return 1;
         }
         else
         {
+            printf("idhar \n");
             printf("\n Incompatible addition/subtraction %s leftOp:%d rightOp:%d \n",node->value,leftOpType,rightOpType);
             return -1;
         }
@@ -153,6 +163,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
 
     if (!strcasecmp(node->value, "MUL"))
     {
+        printf("being mul \n");
         if ((leftOpType == 1 && rightOpType == 1))
         {
             return 1;
@@ -183,11 +194,12 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
     {
         if ((leftOpType == 0 && rightOpType == 0) || (leftOpType == 1 && rightOpType == 1))
         {
+            printf("Returning \n");
             return 2;
         }
         else
         {
-            printf("\n Incompatible relational op ");
+            printf("\n Incompatible relational op \n");
             return -1;
         }
     }
@@ -201,9 +213,38 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
     }
     int lval;
     struct treeNode *lchild = root->children;
-
+    // printf("\nRoot is:%s \n",root->value);
     if (!strcasecmp(root->value, "LVALUEID"))
     { // lchild will be id
+
+        if(!strcmp(root->children->value,"ID") &&!strcmp(root->children->astnextSibling->value,"ID")){
+        struct treeNode* lchild = root->children;
+        struct treeNode* rchild = root->children->astnextSibling;
+        ST_ENTRY* lentry = get_lexeme(table,lchild->tk_data.lexeme);
+        ST_ENTRY* rentry = get_lexeme(table,rchild->tk_data.lexeme);
+        if(lentry!=NULL && rentry!=NULL){
+            printf("\n**Entered here for:%s ",lchild->tk_data.lexeme);
+            if(lentry->is_array ==1 && rentry->is_array == 1){
+                if(!strcasecmp(lentry->type.arr_type.arr_dt,rentry->type.arr_type.arr_dt)){
+                    if(lentry->type.arr_type.isStatic==1 && rentry->type.arr_type.isStatic==1){
+                        if(lentry->type.arr_type.lowRange.start == rentry->type.arr_type.lowRange.start && (lentry->type.arr_type.highRange.end==rentry->type.arr_type.highRange.end)){
+                            printf("\n Assignment statement type match(array) ");
+                            return 1;
+                        }
+                    }
+                }
+                else{
+                    printf("\n Assignment statement type mismatch(array)");
+                    return -1;
+                }
+            }
+
+            if(lentry->is_array + rentry->is_array > 0){
+                printf("\n Assignment statement type mismatch(array - id)");
+                return -1;
+            }
+        }
+    }
         ST_ENTRY *temp = get_lexeme(table, lchild->tk_data.lexeme);
         if(temp==NULL){
             return -1;
@@ -221,7 +262,9 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
         {
             lval = 2;
         }
+        printf("lval is:%d \n",lval);
         int rval = get_type(lchild->astnextSibling, table);
+        printf("rval is:%d \n",rval);
         if (lval == rval)
         {
             printf("\n Assignment statement type match \n");
@@ -235,6 +278,7 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
     }
     else if (!strcasecmp(root->value, "LVALUEARRAY"))
     { // lchild will be array access
+    
         ST_ENTRY *temp = get_lexeme(table, lchild->children->tk_data.lexeme);
         if(temp==NULL){
             return -1;
@@ -909,12 +953,13 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             id_table = child_table;
         }
 
-        else if (!strcasecmp(root->value, "LVALUEID") || !strcasecmp(root->value, "LVALUEARR"))
+        else if (!strcasecmp(root->value, "LVALUEID") || !strcasecmp(root->value, "LVALUEARRAY"))
         {          
 
             type_check = check_assignment(root, id_table);
             if (type_check == -1)
             {
+                printf("INSIDE LVALUEID ERROR");
                 if(root->next!=NULL)semanticAnalysis(root->next, id_table, nesting_num);
                 return;
             }
@@ -943,7 +988,20 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
         // function call
         else if (!strcasecmp(root->value, "MODULE-INVOKE"))
         {
+            // a)moduleReuseStmt=make_new_node(“MODULE-INVOKE”,ID.addr,(make_new_node(“ARGUMENTS”,optional.syn,idList.syn)); //bottom up
+            
+            if(root->children->astnextSibling->children->astnextSibling!=NULL){
+                struct treeNode* opList = root->children->astnextSibling->children;
+                while(opList!=NULL){
+                    ST_ENTRY* temp = get_lexeme(id_table,opList->tk_data.lexeme);
+                    if(temp!=NULL){
+                        temp->is_used=1;
+                    }
+                    opList = opList->next;
+                }
+            }
             type_check = check_function_call(root, id_table);
+            
             if (type_check == -1)
             {
                 if(root->next!=NULL)semanticAnalysis(root->next, id_table, nesting_num);
@@ -964,6 +1022,27 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 if(root->next!=NULL)semanticAnalysis(root->next, id_table, nesting_num);
                 return;
             }
+        }
+        else if(!strcasecmp(root->value,"PRINT")){
+            //can be id/num/rnum/boolvar/arr-print
+            ST_ENTRY* temp;
+            if(!strcasecmp(root->children->value,"ARR-PRINT")){
+                temp=get_lexeme(id_table,root->children->children->tk_data.lexeme);
+            }
+            else if(!strcasecmp(root->children->value,"ID")){
+                temp = get_lexeme(id_table,root->children->tk_data.lexeme);
+                
+            }
+
+                if(temp==NULL){
+                    if(root->next!=NULL)semanticAnalysis(root->next, id_table, nesting_num);
+                    return;
+                }
+                if(temp->is_used!=1){
+                    printf("\nError: Print variable should be assigned some value \n");
+                    if(root->next!=NULL)semanticAnalysis(root->next, id_table, nesting_num);
+                    return;
+                }
         }
     }
 

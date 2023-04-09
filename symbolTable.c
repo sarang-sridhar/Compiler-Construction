@@ -93,6 +93,8 @@ ST_ENTRY* get_lexeme(struct id_symbol_table* table, char* str){
 }
 
 ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode* node,TYPE t1){
+        // if(!strcmp(node->tk_data.lexeme,"new"))
+            // printf("GHUS GAYA\n");
         if(node==NULL){
             printf("AST Node:%s is null \n",node->value);
             return NULL;
@@ -100,7 +102,12 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
         int redeclare_flag = 0;
 
         int hash_value= get_sym_table_hash(node->tk_data.lexeme);
+        // if(table->arr[hash_value] == NULL && !strcmp(node->tk_data.lexeme,"new")){
+            // printf("PEHLI BAAR DECLARE,%s\n",node->tk_data.lexeme);
+        // }
         if(table->arr[hash_value]!=NULL){
+            // if(!strcmp(node->tk_data.lexeme,"new"))
+                // printf("REDECLARED,%s\n",node->tk_data.lexeme);
             ST_ENTRY* temp = table->arr[hash_value];
             while(temp){
                 if(!strcmp(temp->id_lexeme,node->tk_data.lexeme)){
@@ -115,7 +122,8 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
                         }
                     }
                     if(redeclare_flag==0){
-                        printf("Error: Redeclaration of variable %s \n",node->tk_data.lexeme);
+                        printf("\n********************reached********************\n");
+                        printf("\n*****Error: Redeclaration of variable %s, line no : %d *****\n",node->tk_data.lexeme,node->line_no);
                         return NULL;
                     }
                 }
@@ -135,7 +143,7 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
                         temp->type = t1;
                         table->arr[hash_value] = temp;
                         node->symbol_table_entry = temp;
-                        printf("\nEntry done for %s \n",node->tk_data.lexeme);
+                        printf("\nEntry done for %s, line no: %d \n",node->tk_data.lexeme,node->line_no);
                         return temp;
                     }
                     else{
@@ -156,7 +164,7 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
 
         insert_in_table(table,temp);
         node->symbol_table_entry=temp;
-        printf("\nEntry done for %s \n",node->tk_data.lexeme);
+        printf("\nEntry done for %s, line no: %d \n",node->tk_data.lexeme,node->line_no);
         return temp;
 }
 
@@ -176,8 +184,16 @@ FN_ENTRY* create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct tr
             FN_ENTRY* temp = table->arr[hash_value];
             while(temp){
                 if(!strcmp(temp->fn_name,node->tk_data.lexeme)){
-                    printf("Error: Redeclaration of variable %s \n",node->tk_data.lexeme);
-                    return NULL;
+                    if(temp->ip_head!=NULL){
+                        printf("Error: Redeclaration of function/Overloading of function %s, line no  %d \n",node->tk_data.lexeme,node->line_no);
+                        return NULL;
+                    }
+                    else{
+                        temp->ip_head = ip_list;
+                        temp->op_head = op_list;
+                        node->function_table_entry = temp;
+                        return temp;
+                    }
                 }
                 temp = temp->next;
             }
@@ -217,12 +233,16 @@ struct fn_symbol_table* initFST(){
     return t;
 }
 
-LISTNODE* makeListNode(struct treeNode* head){  
+LISTNODE* makeListNode(struct treeNode* head,int isOpList){  
     if(head == NULL)
         return NULL;
     LISTNODE* temp = malloc(sizeof(LISTNODE));
     temp->parameter_name = head->tk_data.lexeme;    
     if(!strcmp(head->pair->value,"ARRAY-DCL")){
+        //ALERT
+        if(isOpList == 1){
+            printf("Error:Array cannot be function Output Parameter\n");
+        }
         temp->parameter_type.arr_type.arr_dt = head->pair->children->astnextSibling->value;
         temp->is_array=1;
         struct treeNode* li = head->pair->children->children;
@@ -283,7 +303,7 @@ LISTNODE* makeListNode(struct treeNode* head){
         temp->is_array=0;
         temp->parameter_type.id_type.id_dt = head->pair->value; 
     }
-    temp->next = makeListNode(head->next);
+    temp->next = makeListNode(head->next,isOpList);
     return temp;
 }
 

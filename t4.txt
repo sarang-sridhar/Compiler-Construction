@@ -47,9 +47,12 @@ start
 	start
 		x:=x+y;
 		declare u, v:real;
+		declare z: integer;
 		u := y+c*34.2;
 		v:= u-c*p-20.5E+2;		**ERROR: variable p is not declared**
 		switch(k)
+
+		
 		start
 			case 10: declare A:real;
 				 declare B: array[10..30] of integer;
@@ -96,4 +99,5 @@ start
 	B:= C;
 	declare B: real;							**ERROR: variable B is re-declared**
 end
+
 

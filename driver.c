@@ -57,6 +57,17 @@ void removeComments(char *name)
     fclose(cfp);
 }
 
+void preProcessing(char* name){
+    FILE* prefp = fopen(name, "a");
+    if (prefp == NULL)
+    {
+        return;
+    }
+    // append new line character at the end of file
+    fprintf(prefp,"\n");
+    fclose(prefp);
+}
+
 void print_token()
 {
     if (global_token.hasError == 1)
@@ -337,14 +348,14 @@ void runParser(FILE *fp2)
     }
 
     // printf("%s\n",root->value);
-    createAST(root);
-    printf("\nLMAOO DED\n");
-    // printf("%s",root->value);
-    //printParseTree(root,stdout);
-    fprintf(fp2, "AST TREE:\n");
-    // printParseTree(root, fp2);
-    //  printf("VALUE OF ADDR BEFORE:%s\n",root->addr->value);
-    printAST(root, fp2);
+    // createAST(root);
+    // printf("\nLMAOO DED\n");
+    // // printf("%s",root->value);
+    // //printParseTree(root,stdout);
+    // fprintf(fp2, "AST TREE:\n");
+    // // printParseTree(root, fp2);
+    // //  printf("VALUE OF ADDR BEFORE:%s\n",root->addr->value);
+    // printAST(root, fp2);
     // printf("VALUE OF ADDR AFTER:%s\n",root->addr->value);
     free(element);
     free(tree_node);
@@ -359,6 +370,8 @@ int main(int argc, char *argv[])
         printf("\n there must be three arguments- SourceCode ParsetreeOutput Buffer_size");
         return 0;
     }
+
+    preProcessing(argv[1]);
 
     printf("\nImplementation Details\n(a) FIRST and FOLLOW set automated\n(b)Both lexical and syntax analysis modules implemented and work properly\n(c) modules pass all test cases\n(d) parse tree printed into file\n");
     int option;

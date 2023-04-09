@@ -19,6 +19,7 @@ struct treeNode
 {
     int line_no;
     int visited; //1 if visited, 0 if not visited
+    int entry_visited; // 1 means visited
     char value[23]; //token name
     int isTerminal;
     struct treeNode* children;

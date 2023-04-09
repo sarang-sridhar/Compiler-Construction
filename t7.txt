@@ -45,7 +45,7 @@ start
 	k:= a>b OR b>100;
 	[v1, a, k, h]:=use module function1 with parameters b7, v2, p, b7, b;	**ERROR: input parameter type mismatch **			
 	print(k);	
-end						 ** ERROR: Output parameter n is not assigned any value **
+end					 ** ERROR: Output parameter n is not assigned any value **
 
 <<module function2>>
 takes input [ x:integer, y:integer];
@@ -158,4 +158,11 @@ start
 	R1:= a+weight/20.50;
 	R4:=f + 100;
 end								** ERROR: Output parameter R3 is not assigned any value **
+
+
+
+
+
+
+
 

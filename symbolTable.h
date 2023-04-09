@@ -64,6 +64,7 @@ struct entry2
     // o/p list
     LISTNODE *op_head;
     char *fn_name;
+    int is_declared;  //for function declaration
     FN_ENTRY *next;                      // linear probing
     struct id_symbol_table *child_table; // children
     // check for parent
@@ -73,6 +74,7 @@ struct entry
 {
     int is_used;
     int is_array; // 0- not array 1-array
+    int is_for; // 0- not for 1-for
     int offset;
     TYPE type;
     char *id_lexeme;

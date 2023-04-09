@@ -14,7 +14,7 @@ int is_important_terminal(char *t)
 
 struct treeNode *insert_at_beginning(struct treeNode *head, struct treeNode *node)
 {
-    printf("\nInside list\n");
+    //printf("\nInside list\n");
     if (head == NULL)
     {
         head = node;
@@ -176,7 +176,7 @@ void createAST(struct treeNode *root)
     // capture rule number from treeNode
     int rule_no = root->ruleNo;
     if (!strcmp(root->value, "otherModules"))
-        printf("Rule no : %d %d %s \n", rule_no, root->isTerminal, root->children->value);
+        //printf("Rule no : %d %d %s \n", rule_no, root->isTerminal, root->children->value);
 
     // if(!strcmp(root->value,"EPSILON"))
     //     printf("EPSILON's isTerminal:%d",root->isTerminal);
@@ -334,10 +334,10 @@ void createAST(struct treeNode *root)
 
         case 7:
             // printf("\nCreated AST called on %s's child\n",root->value);
-            printf("\n:()\n");
+            //printf("\n:()\n");
             root->syn = NULL;
             createAST(temp_child);
-            printf("SAD LYF\n");
+            //printf("SAD LYF\n");
             return;
 
         case 8:
@@ -548,7 +548,7 @@ void createAST(struct treeNode *root)
         case 26:
             //("Creating AST called on:%s\n",temp_child->value);
             createAST(temp_child);
-            printf("WHAT ABOUT THIS?\n");
+            //printf("WHAT ABOUT THIS?\n");
             if (!strcmp(temp_child->value, "statements"))
             {
                 //("\nInside if for statements\n");
@@ -561,7 +561,7 @@ void createAST(struct treeNode *root)
 
         case 27:
             createAST(temp_child);
-            printf("IDHAR AAYA KYA?\n");
+            //printf("IDHAR AAYA KYA?\n");
             if (!strcmp(temp_child->value, "statement"))
             {
                 temp = temp_child->addr;
@@ -631,9 +631,9 @@ void createAST(struct treeNode *root)
             if (!strcmp(temp_child->value, "print_var"))
             {
                 children[0] = temp_child->addr;
-                printf("HEY THERE\n");
+                //printf("HEY THERE\n");
                 root->addr = makeNewNode("PRINT", children, 1);
-                printf("HELLO WORLD\n");
+                //printf("HELLO WORLD\n");
                 temp_child = temp_child->nextSibling;
                 deleteNode(freenode);
                 continue;
@@ -1789,7 +1789,7 @@ void createAST(struct treeNode *root)
             {
                 children[1] = temp_child;
                 children[1] = makeNewNode("RIGHT-FOR", children, 2);
-                printf("RIGHT FOR KA BACCHA:%s\n",children[1]->children->value);
+                //printf("RIGHT FOR KA BACCHA:%s\n",children[1]->children->value);
                 children[0] = temp;
                 root->addr = makeNewNode("RANGE-FOR", children, 2);
                 return;

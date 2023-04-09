@@ -51,13 +51,13 @@ start
 	res_2_a:= -(a*b-c/pqr_2);				**ERROR: Type mismatch error**
 	declare s: integer;					**Not an error as a local variable can shadow the input parameter**
 	declare q4, q5: real;
-	res_2__b:= (res_2_b + p)*12+22.34E-2*q5;		**ERROR variable p is not declared**
+	res_2__b:= (res_2__b + p)*12+22.34E-2*q5;		**ERROR variable p is not declared**
 	declare m,n: boolean;
 	s:= 12;
 	res_1 := a <=  b AND c >= a OR  a<0 AND false;
 	
 	m:= n AND (abc_1<=pqr_2);
-	while(m OR a>=b AND res_2_b<=129.54e+3)
+	while(m OR a>=b AND res_2__b<=129.54e+3)
 	start
 		b:=b+1;
 		m:= n OR b>=res_2_a;
@@ -96,4 +96,5 @@ start
 	print(result_);
 	declare u1: real;					**ERROR: variable u1 is re-declared**
 end
+
 

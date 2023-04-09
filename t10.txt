@@ -59,7 +59,7 @@ start
 			 end
 			 E[7]:= k+12 - Q*10;       
 			 break;
-		case true: m:=m-n;
+		case true: m:=m-n; 
 			 print(m);			
 			 break;
 		default: E[9]:= B[15]+Q;	      **ERROR: presence of default statement is incorrect as condiiton variable type is boolean** 
@@ -99,3 +99,10 @@ start
 			break;
 	end					**ERROR: default statement is missing- the type of switch variable is integer**
 end
+
+
+
+
+
+
+

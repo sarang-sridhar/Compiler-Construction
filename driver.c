@@ -10,6 +10,7 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 #include "parser.c"
 #include "ast.c"
 #include "semanticAnalysis.c"
+#include "IRCodeGen.c"
 #include<time.h>
 
 void removeComments(char *name)
@@ -355,7 +356,7 @@ void runParser(FILE *fp2)
     // fprintf(fp2, "AST TREE:\n");
     // // printParseTree(root, fp2);
     // //  printf("VALUE OF ADDR BEFORE:%s\n",root->addr->value);
-    // printAST(root, fp2);
+    printAST(root, fp2);
     // printf("VALUE OF ADDR AFTER:%s\n",root->addr->value);
     free(element);
     free(tree_node);
@@ -540,10 +541,30 @@ int main(int argc, char *argv[])
             else{
                 printf("root's addr is:%s\n",root->addr->value);
                 fillDef(root->addr); //pass PROGRAM node
-                printf("After fill def\n");
                 struct id_symbol_table* initial_table = initST(0);
                 semanticAnalysis(root,initial_table,0,0);
             }
+            break;
+        case 7:
+            //setting program's parent as NULL
+            root->addr->parent = NULL;
+            count = 0;
+            variable_count =0;
+            temporaries_st=initST(0);
+            IRcodegenerate(root);
+            printf("After code generate\n");
+            // for(int i=0;i<count;i++){
+            //     printf("Operator is:%s\n",quadTable[i].op);
+            //     printf("Dikkat here\n");
+            //     if(quadTable[i].arg1.arg_var!=NULL)
+            //         printf("Arg 1 is:%s\n",quadTable[i].arg1.arg_var->id_lexeme);
+            //     if(quadTable[i].arg2.arg_var!=NULL)
+            //         printf("Arg 2 is:%s\n",quadTable[i].arg2.arg_var->id_lexeme);
+            //     if(quadTable[i].result.arg_var!=NULL)
+            //         printf("Result is:%s\n",quadTable[i].result.arg_var->id_lexeme);
+            //     if(quadTable[i].instruction!=NULL)
+            //         printf("Instruction is:%s\n",quadTable[i].instruction);
+            // }
             break;
         default:
             printf("\n choose one of the given options\n");

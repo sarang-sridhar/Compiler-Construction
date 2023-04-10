@@ -1,5 +1,5 @@
 #include "IRCodeGen.h"
-#include "symbolTable.c"
+// #include "symbolTable.c
 
 char *newlabel()
 {
@@ -11,10 +11,11 @@ char *newlabel()
 
 ST_ENTRY *newTemp(TYPE t)
 {
-    char *temp = (char *)malloc(TEMP_LEN * sizeof(char));
+    //char *temp = (char *)malloc(TEMP_LEN * sizeof(char));
+    char temp[TEMP_LEN];
     sprintf(temp, "t_%d", variable_count);
     variable_count++;
-    struct treeNode *temp_node;
+    struct treeNode *temp_node = malloc(sizeof(struct treeNode));
     strcpy(temp_node->tk_data.lexeme, temp);
     temp_node->addr = NULL;
     temp_node->astnextSibling = NULL;
@@ -36,20 +37,26 @@ ST_ENTRY *newTemp(TYPE t)
 // CHANGE TYPE ACCORDING TO PRECEDENCE
 void operator_appears(struct treeNode *root)
 {
-    if (root->visited)
-        return;
-    root->visited = 1;
+    //YE HATAYA HAI
+    // if (root->visited)
+    //     return;
+    // root->visited = 1;
     struct treeNode *leftChild = root->children;
     if (leftChild == NULL)
         return;
     struct treeNode *rightChild = root->children->astnextSibling;
     TYPE t;
     // for left-child
+    printf("before leftChild:%s\n",leftChild->tk_data.lexeme);
     if (leftChild->temp_variable_entry == NULL)
     {
+        printf("idhar aaya \n");
         if (!strcmp(leftChild->value, "ID"))
         {
+            if(leftChild->symbol_table_entry == NULL)
+                printf("THIS IS NULL\n");
             quadTable[count].arg1.arg_var = leftChild->symbol_table_entry;
+            printf("Left child ka st entry is:%s \n",leftChild->symbol_table_entry->id_lexeme);
             t = leftChild->symbol_table_entry->type;
         }
         else if (!strcmp(leftChild->value, "NUM"))
@@ -95,8 +102,10 @@ void operator_appears(struct treeNode *root)
     // for right-child
     if (rightChild->temp_variable_entry == NULL)
     {
-        if (!strcmp(rightChild->value, "ID"))
+        if (!strcmp(rightChild->value, "ID")){
+            printf("Right child ka symbol table entry is:%s\n",rightChild->symbol_table_entry->id_lexeme);
             quadTable[count].arg2.arg_var = rightChild->symbol_table_entry;
+        }
         else if (!strcmp(rightChild->value, "NUM"))
             quadTable[count].arg2.arg_num = rightChild->tk_data.val;
         else if (!strcmp(rightChild->value, "RNUM")) // RNUM case
@@ -128,9 +137,11 @@ void operator_appears(struct treeNode *root)
     }
 
     // set operator
-    strcpy(quadTable[count].op, root->tk_data.lexeme);
+    strcpy(quadTable[count].op, root->value);
 
+    //printf("Before new temp:%s\n",t.id_type.id_dt);
     ST_ENTRY *tempVarEntry = newTemp(t);
+    //printf("After new temp\n");
     quadTable[count].result.arg_var = tempVarEntry;
     root->temp_variable_entry = tempVarEntry; // set temp_variable entry of node
     count++;
@@ -341,7 +352,7 @@ void while_expression_codeGen(struct treeNode *root)
         //     quadTable[count].arg2.arg_var = rightChild->temp_variable_entry;
         // }
 
-        strcpy(quadTable[count].op, root->tk_data.lexeme);
+        strcpy(quadTable[count].op, root->value);
         quadTable[count].goTolabel = root->true_label;
         quadTable[count].instruction = "IF";
         count++;
@@ -382,10 +393,10 @@ void for_appears_top(struct treeNode *root)
     count++;
 
     // goto for false condition
-    if (root->next == NULL && !strcmp(root->parent->value, "MODULE_DEF"))
+    if (root->next == NULL && root->parent!=NULL &&  !strcmp(root->parent->value, "MODULE_DEF"))
         quadTable[count].goTolabel = "return";
     // doubtful case
-    else if (root->next == NULL && strcmp(root->parent->parent->value, "SWITCH"))
+    else if (root->next == NULL && root->parent!=NULL && root->parent->parent!=NULL && strcmp(root->parent->parent->value, "SWITCH"))
     {
         if (root->parent->constructLabel == NULL)
             root->parent->constructLabel = newlabel();
@@ -530,8 +541,14 @@ void IRcodegenerate(struct treeNode *root)
         return;
     root->visited = 1;
 
+    printf("Called for:%s\n",root->value);
+
+    //printf("Before label\n");
+
     if (root->constructLabel == NULL)
         root->constructLabel = newlabel();
+
+   // printf("After label\n");
 
     quadTable[count].label = root->constructLabel; // set label at the beginning of each construct
 
@@ -584,7 +601,7 @@ void IRcodegenerate(struct treeNode *root)
             root->constructLabel = newlabel();
         //store label in symbol table entry
         quadTable[count].instruction = "DECLAREMOD";
-        quadTable[count].result.arg_var = root->children->symbol_table_entry;
+        quadTable[count].arg_fn_name = root->children->function_table_entry;
         count++;
     }
     
@@ -593,7 +610,7 @@ void IRcodegenerate(struct treeNode *root)
         for_appears_top(root);
     }
     // case stmt top-down
-    else if (!strcmp(root->parent->value, "SWITCH") && root->pair != NULL)
+    else if (root->parent!=NULL && !strcmp(root->parent->value, "SWITCH") && root->pair != NULL)
     {
         case_appears_top(root);
     }
@@ -604,14 +621,21 @@ void IRcodegenerate(struct treeNode *root)
             while_expression_appears(root);
     }
     
-    if (!strcmp(root->value, "LVALUEID") || !strcmp(root->value, "LVALUEARR") || root->isChildOfAssign)
-        root->children->isChildOfAssign = 1;
-    else
-        root->children->isChildOfAssign = 0;
+    //printf("Before this\n");
+    if(root->children!=NULL){
+        if (!strcmp(root->value, "LVALUEID") || !strcmp(root->value, "LVALUEARRAY") || root->isChildOfAssign)
+            root->children->isChildOfAssign = 1;
+        else{
+            root->children->isChildOfAssign = 0;
+        }
+    }
+    //printf("After this\n");
         
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // left-child expand
+    printf("Before call\n");
     IRcodegenerate(root->children);
+    printf("After call\n");
 
     if (!strcmp(root->value, "AND") && !root->isChildOfAssign)
     {
@@ -642,11 +666,12 @@ void IRcodegenerate(struct treeNode *root)
     //control comes to a node
     if (root->addr != NULL)
     {
+        printf("then called for:%s \n",root->addr->value);
         IRcodegenerate(root->addr);
     }
     else
     {
-        
+        //printf("Here:%s\n",root->value);
         if (!strcmp(root->value, "LVALUEID"))
         {
             if (root->constructLabel == NULL)
@@ -678,7 +703,7 @@ void IRcodegenerate(struct treeNode *root)
             count++;
         }
 
-        else if (!strcmp(root->value, "LVALUEARR"))
+        else if (!strcmp(root->value, "LVALUEARRAY"))
         {
             if (root->constructLabel == NULL)
                 root->constructLabel = newlabel();
@@ -730,7 +755,9 @@ void IRcodegenerate(struct treeNode *root)
         {
             if (root->constructLabel == NULL)
                 root->constructLabel = newlabel();
+            printf("Before Operator appears called\n");
             operator_appears(root);
+            printf("After Operator appears called\n");
         }
         else if (!strcmp(root->value, "AND") || !strcmp(root->value, "OR") || !strcmp(root->value, "LT") || !strcmp(root->value, "LE") || !strcmp(root->value, "GT") || !strcmp(root->value, "GE") || !strcmp(root->value, "NE") || !strcmp(root->value, "EQ"))
         {
@@ -746,22 +773,35 @@ void IRcodegenerate(struct treeNode *root)
             }
         }
         else if (!strcmp(root->value, "U_MINUS") || !strcmp(root->value, "U_PLUS"))
-        {
+        {   printf("Entered for %s \n",root->value);
             // set operator
             if (root->constructLabel == NULL)
                 root->constructLabel = newlabel();
-            strcpy(quadTable[count].op, root->tk_data.lexeme);
+            strcpy(quadTable[count].op, root->value);
+            printf("After strcpy\n");
+            TYPE t;
             struct treeNode *rightChild = root->children->astnextSibling;
-            if (rightChild->temp_variable_entry != NULL)
+            if (rightChild->temp_variable_entry != NULL){
                 quadTable[count].arg1.arg_var = rightChild->temp_variable_entry;
-            else if (!strcmp(rightChild->value, "ID"))
+                t = rightChild->temp_variable_entry->type;
+            }
+            else if (!strcmp(rightChild->value, "ID")){
                 quadTable[count].arg1.arg_var = rightChild->symbol_table_entry;
-            else if (!strcmp(rightChild->value, "NUM"))
+                t = rightChild->symbol_table_entry->type;
+            }
+            else if (!strcmp(rightChild->value, "NUM")){
                 quadTable[count].arg1.arg_num = rightChild->tk_data.val;
-            else // RNUM case
+                t.id_type.id_dt = "INTEGER";
+            }
+            else{ // RNUM case
                 quadTable[count].arg1.arg_num = rightChild->tk_data.realVal;
+                t.id_type.id_dt = "REAL";
+            }
             quadTable[count].arg2.arg_var = NULL;
-            ST_ENTRY *tempVarEntry = newTemp(rightChild->symbol_table_entry->type);
+            
+            // NUM KA SYMBOL TABLE ENTRY NAHI HAI
+            ST_ENTRY *tempVarEntry = newTemp(t);
+           
             quadTable[count].result.arg_var = tempVarEntry;
             root->temp_variable_entry = tempVarEntry; // set temp_variable entry of node
             count++;
@@ -798,6 +838,7 @@ void IRcodegenerate(struct treeNode *root)
             { // boolean case
                 quadTable[count].result.arg_var = root->children->symbol_table_entry;
             }
+            count++;
         }
         else if (!strcmp(root->value, "WHILE"))
         {
@@ -817,14 +858,14 @@ void IRcodegenerate(struct treeNode *root)
                 root->constructLabel = newlabel();
         }
         // check-kar lena ek baar switch(essentially checking for case stmts)
-        else if (!strcmp(root->parent->value, "SWITCH") && root->pair != NULL)
+        else if (root->parent!=NULL && !strcmp(root->parent->value, "SWITCH") && root->pair != NULL)
         {
             if (root->constructLabel == NULL)
                 root->constructLabel = newlabel();
             case_appears_bottom(root);
         }
         // check for default
-        else if (!strcmp(root->parent->value, "SWITCH") && root->astnextSibling == NULL)
+        else if (root->parent!=NULL && !strcmp(root->parent->value, "SWITCH") && root->astnextSibling == NULL)
         {
             if (root->constructLabel = NULL)
                 root->constructLabel = newlabel();
@@ -911,6 +952,6 @@ void IRcodegenerate(struct treeNode *root)
     }
 }
 
-int main(){
-    return 0;
-}
+// int main(){
+//     return 0;
+// }

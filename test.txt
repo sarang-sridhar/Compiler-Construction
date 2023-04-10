@@ -1,10 +1,7 @@
 <<<driver program>>>
 start
-    declare b:integer;
-    declare c,d:array[21..20] of real;
-    for(k in -10..20)
-    start
-    b:=b+1;
-    end
-    c:=d;
+declare a,b,c:integer;
+get_value(a);
+print(b);
 end
+

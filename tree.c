@@ -42,6 +42,9 @@ void addChild(struct treeNode *parent, struct node *child)
         if (temp2->isTerminal)
             temp2->children = NULL;
         temp2->parent = parent;
+        temp2->temp_variable_entry = NULL;
+        temp2->function_table_entry = NULL;
+        temp2->symbol_table_entry = NULL;
         temp2->visited = 0;
         temp2->type_inh = NULL;
         temp2->type_syn = NULL;

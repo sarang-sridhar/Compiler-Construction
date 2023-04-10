@@ -14,11 +14,13 @@ union argument
 typedef struct Quadruple
 {
     char op[7];
+    int filled; //0 for arg_var, 1 for arg_num, 2 for arg_rnum, 3 for arg_bool
     union argument arg1;
     union argument arg2;
     union argument index1;
     union argument index2;
     union argument result;
+    FN_ENTRY* arg_fn_name; //for function table entry
     char* goTolabel; //jump to this label
     char* instruction;  //if or goTO or blah blah
     char* label;  //contsructs own label

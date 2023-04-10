@@ -165,6 +165,7 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
 
         insert_in_table(table,temp);
         node->symbol_table_entry=temp;
+        printf("Node's symbol table entry:%s\n",node->symbol_table_entry->id_lexeme);
         printf("\nEntry done for %s, line no: %d \n",node->tk_data.lexeme,node->line_no);
         return temp;
 }

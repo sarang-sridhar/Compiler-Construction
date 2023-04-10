@@ -24,6 +24,9 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
                 // printf("ID IS NULL");
                 return -1;
             }
+            
+            //creating symbol table entry for a node
+            node->symbol_table_entry=temp;
             // printf("\n HEre before type\n");
             char *datatype;
             if(temp->is_for == 1)
@@ -77,11 +80,16 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         
             return get_type(node->children->astnextSibling, table);
         }
-            if (!strcasecmp(node->value, "ARRAY_ACCESS"))
-    {   
+        if (!strcasecmp(node->value, "ARRAY_ACCESS"))
+        {   
         int ans;
         ST_ENTRY *temp = get_lexeme(table, node->children->tk_data.lexeme);
-        if(temp==NULL){return -1;}
+        if(temp==NULL){
+            return -1;
+        }
+
+        // creating symbol table entry for array id
+        node->children->symbol_table_entry=temp;
         char *datatype;
         datatype = temp->type.arr_type.arr_dt;
         if (!strcasecmp(datatype, "integer"))
@@ -233,6 +241,8 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
         ST_ENTRY* lentry = get_lexeme(table,lchild->tk_data.lexeme);
         ST_ENTRY* rentry = get_lexeme(table,rchild->tk_data.lexeme);
         if(lentry!=NULL && rentry!=NULL){
+            lchild->symbol_table_entry=lentry;
+            rchild->symbol_table_entry=rentry;
             printf("\n**Entered here for:%s ",lchild->tk_data.lexeme);
             if(lentry->is_array ==1 && rentry->is_array == 1){
                 // printf("\n inside is array \n");
@@ -267,6 +277,7 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
         if(temp==NULL){
             return -1;
         }
+        lchild->symbol_table_entry=temp;
         char *datatype;
         if(temp->is_for == 1)
             datatype = "INTEGER";
@@ -522,6 +533,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
                     // printf("\n line 514 \n");
                     return -1;
                 }
+                
                 else if(ip_entry->is_for==1){
                     // printf("\n line 518 \n");
                     if(strcasecmp(defined_ip_list->parameter_type.id_type.id_dt,"INTEGER"))
@@ -550,6 +562,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
                 if(strcasecmp(defined_ip_list->parameter_type.id_type.id_dt,ip_entry->type.id_type.id_dt))
                     comparison_flag_type_checking =1;
                 }
+                actual_child->symbol_table_entry=ip_entry;
                 // printf("\n line 543 \n");
             }
             // printf("\n line 536 \n");
@@ -601,6 +614,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
                     return -1;
                 }
             }
+            
         }
         // printf("\n line 586 \n");
         called_ip_list = called_ip_list->next;
@@ -635,6 +649,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
     if(temp==NULL){
         return -1;
     }
+    root->children->symbol_table_entry=temp; //setting symbol table entry for switch var
     char *datatype;
     if(temp->is_for==1){
          datatype = "INTEGER";
@@ -1069,7 +1084,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             struct treeNode* leftChild = root->children;
 
             // module declaration hai, CHANGE HUA HAI IDHAR
-            if(!strcmp(leftChild->value,"ID")){
+            if(leftChild!=NULL && !strcmp(leftChild->value,"ID")){
                 while(leftChild!=NULL){
                     //printf("FUNC DECLARE:%s \n",leftChild->tk_data.lexeme);
                     FN_ENTRY* fn_declare = create_entry_and_insert_in_FST(fn_table,leftChild,NULL,NULL,0); //set i/p and o/p as NULL
@@ -1128,6 +1143,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 printf("Offset for:%s is %d \n",root->children->tk_data.lexeme,offset);
                 offset+=2;
                 temp->width=2;
+                root->children->symbol_table_entry=temp; //symbol table entry for conditional variable node of "for"
             }
             child_table->parent_table = id_table;
             if (id_table->child_table == NULL)
@@ -1543,6 +1559,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 if(root->next!=NULL)semanticAnalysis(root->next, id_table, nesting_num, offset);
                 return;   
             }
+            root->children->symbol_table_entry=temp;
             temp->is_used = 1;
             // else if(temp->is_array==1){
             //     printf("\n Error: Get-Value for array \n");
@@ -1556,9 +1573,15 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             ST_ENTRY* temp;
             if(!strcasecmp(root->children->value,"ARR-PRINT")){
                 temp=get_lexeme(id_table,root->children->children->tk_data.lexeme);
+                if(temp!=NULL){
+                    root->children->children->symbol_table_entry=temp;
+                }
             }
             else if(!strcasecmp(root->children->value,"ID")){
                 temp = get_lexeme(id_table,root->children->tk_data.lexeme);
+                if(temp!=NULL){
+                    root->children->symbol_table_entry=temp;
+                }
                 
             }
 
@@ -1566,6 +1589,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 if(root->next!=NULL)semanticAnalysis(root->next, id_table, nesting_num, offset);
                 return;
             }
+
             // if(temp->is_used!=1){
             //     printf("\nError: Print variable should be assigned some value \n");
             //     if(root->next!=NULL)semanticAnalysis(root->next, id_table, nesting_num, offset);
@@ -1649,16 +1673,18 @@ void insert_input_output(struct treeNode* root){
 void fillDef(struct treeNode* root){ //fill def and declns 
     // take PROGRAM node as the root
     struct treeNode* childA = root->children;  //can be drivermodule/moduledef/moduledecln
-    struct treeNode* childB = childA->astnextSibling; 
-    struct treeNode* childC; 
-    struct treeNode* childD;
+    struct treeNode* childB = NULL;
+    if(childA!=NULL)
+        childB = childA->astnextSibling; 
+    struct treeNode* childC = NULL; 
+    struct treeNode* childD = NULL;
     if(childB!=NULL)
         childC = childB->astnextSibling; 
     if(childC!=NULL)
         childD = childC->astnextSibling;
 
     //this is module declaration    
-    if(!strcmp(childA->value,"ID")){
+    if(childA!=NULL && !strcmp(childA->value,"ID")){
         while(childA!=NULL){
             FN_ENTRY* func_entry = create_entry_and_insert_in_FST(fn_table_pass1,childA,NULL,NULL,1); //first pass
             func_entry->is_declared = 1;
@@ -1667,7 +1693,7 @@ void fillDef(struct treeNode* root){ //fill def and declns
         }
     }
 
-    printf("After declare\n");
+    //printf("After declare\n");
 
     //this is module def
     if(childA!=NULL && !strcmp(childA->value,"MODULE_DEF")){
@@ -1676,7 +1702,7 @@ void fillDef(struct treeNode* root){ //fill def and declns
             childA = childA->next;
         }
     }
-    printf("After module def\n");
+    //printf("After module def\n");
     if(childB!=NULL && !strcmp(childB->value,"MODULE_DEF")){  //child1 is decln and child2 is moduledef or child1 is driver and child2 is moduledef
         while(childB!=NULL){
             insert_input_output(childB);
@@ -1695,4 +1721,5 @@ void fillDef(struct treeNode* root){ //fill def and declns
             childD = childD->next;
         }
     }
+    //printf("\nAfter first pass\n");
 }

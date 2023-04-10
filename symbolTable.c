@@ -161,6 +161,7 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
         temp->id_lexeme = node->tk_data.lexeme;
         temp->next = NULL;
         temp->type = t1;
+        temp->last_assigned_nesting=-1;
 
         insert_in_table(table,temp);
         node->symbol_table_entry=temp;
@@ -168,7 +169,7 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
         return temp;
 }
 
-FN_ENTRY* create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct treeNode* node,LISTNODE* ip_list,LISTNODE* op_list){
+FN_ENTRY* create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct treeNode* node,LISTNODE* ip_list,LISTNODE* op_list,int is_first_pass){
         if(node==NULL){
             printf("AST Node:%s is null inside create entry in FST \n",node->value);
             return NULL;
@@ -185,7 +186,8 @@ FN_ENTRY* create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct tr
             while(temp){
                 if(!strcmp(temp->fn_name,node->tk_data.lexeme)){
                     if(temp->ip_head!=NULL){
-                        printf("Error: Redeclaration of function/Overloading of function %s, line no  %d \n",node->tk_data.lexeme,node->line_no);
+                        if(!is_first_pass)
+                            printf("Error: Redeclaration of function / Overloading of function %s, line no  %d \n",node->tk_data.lexeme,node->line_no);
                         return NULL;
                     }
                     else{

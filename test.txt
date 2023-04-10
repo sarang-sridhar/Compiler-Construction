@@ -1,12 +1,10 @@
 <<<driver program>>>
 start
     declare b:integer;
-    declare c,d:array[10..20] of real
+    declare c,d:array[21..20] of real;
     for(k in -10..20)
     start
     b:=b+1;
     end
-
     c:=d;
 end
-

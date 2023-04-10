@@ -65,9 +65,12 @@ struct entry2
     LISTNODE *op_head;
     char *fn_name;
     int is_declared;  //for function declaration
+    int is_valid; //for checking whether declaration is valid or not
     FN_ENTRY *next;                      // linear probing
     struct id_symbol_table *child_table; // children
     // check for parent
+    int declLine;
+    int defLine;
 };
 
 struct entry
@@ -76,9 +79,12 @@ struct entry
     int is_array; // 0- not array 1-array
     int is_for; // 0- not for 1-for
     int offset;
+    int width;
     TYPE type;
     char *id_lexeme;
     struct entry *next; // linear probing
+    int last_assigned_nesting;
+
 };
 
 struct id_symbol_table
@@ -101,3 +107,4 @@ struct fn_symbol_table
 
 //declare function symbol table
 struct fn_symbol_table *fn_table; 
+struct fn_symbol_table* fn_table_pass1;

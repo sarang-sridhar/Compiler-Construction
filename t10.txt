@@ -99,10 +99,3 @@ start
 			break;
 	end					**ERROR: default statement is missing- the type of switch variable is integer**
 end
-
-
-
-
-
-
-

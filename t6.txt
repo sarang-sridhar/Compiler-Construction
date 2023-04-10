@@ -45,6 +45,7 @@ start
 		declare b: array[2..20] of integer;
 		declare b5, b6: array[35..50] of real;
 		b:= m;
+		x:=1;
 		[v1, u, bool1, n]:=use module function1 with parameters b4, v2, p, b5, u;	**not an error**			
 		b[2]:= u+m[25];			   **ERROR: element of array m is out of bound** 
 		p:= b[18]*18.56E+2;		   **ERROR: type mismatch **
@@ -150,5 +151,6 @@ start
 	B:= C;
 	C:= D;				        **ERROR: type mismatch error**        
 end
+
 
 

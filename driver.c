@@ -108,8 +108,8 @@ void print_choices()
     printf("\n 4. Print total time taken by the stage 1 code:");
     printf("\n 5. Print AST in text file :");
     printf("\n 6. Semantic Analysis :");
+    printf("\n 7. Intermediate Code Generation :");
     printf("\n******\n");
-
 }
 
 void totalTime()
@@ -535,10 +535,14 @@ int main(int argc, char *argv[])
         case 6:
             createAST(root);
             fn_table = initFST(0);
+            fn_table_pass1 = initFST(0);
             if(root==NULL) printf("ROOT IS NULL\n");
             else{
+                printf("root's addr is:%s\n",root->addr->value);
+                fillDef(root->addr); //pass PROGRAM node
+                printf("After fill def\n");
                 struct id_symbol_table* initial_table = initST(0);
-                semanticAnalysis(root,initial_table,0);
+                semanticAnalysis(root,initial_table,0,0);
             }
             break;
         default:

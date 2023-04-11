@@ -116,6 +116,7 @@ void print_choices()
     printf("\n 5. Print Symbol Table :");
     printf("\n 6. Activation record size :");
     printf("\n 7. Print Static Dynamic Arrays :");
+    printf("\n 8. Error Analysis(Lexical, Syntax, Semantic) :");
     printf("\n******\n");
 }
 

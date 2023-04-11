@@ -11,7 +11,7 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 #include "ast.c"
 #include "semanticAnalysis.c"
 #include "IRCodeGen.c"
-#include<time.h>
+#include <time.h>
 
 void removeComments(char *name)
 {
@@ -245,15 +245,25 @@ void printAST(struct treeNode *root, FILE *outfile)
 {
     if (root == NULL)
         return;
-
+    
+    if (root->children != NULL)
+        root->children->parent = root;
     printAST(root->children, outfile);
+
+    // printf("\n root's value inside print AST %s \n", root->value);
+
 
     if (root->addr != NULL)
     {
         printAST(root->addr, outfile);
     }
     else
-    {
+    { 
+        if(!strcmp(root->value,"SWITCH")){
+            if(root->children->astnextSibling->astnextSibling!=NULL)
+                root->children->astnextSibling->astnextSibling->isDefault = 1; //setting isdefault one for deault ka node
+        }
+        // printf("\n came here \n");
         fprintf(outfile, "%s\n", root->value);
     }
 
@@ -264,20 +274,27 @@ void printAST(struct treeNode *root, FILE *outfile)
 
         while (temp != NULL)
         {
+            temp->parent = root;
             printAST(temp, outfile);
             temp = temp->astnextSibling;
         }
     }
 
-    if(root->pair!=NULL)
+    struct treeNode * temp_par = root->parent;
+
+    if(root->pair!=NULL){
+        root->pair->parent = temp_par;
         printAST(root->pair, outfile);
+    }
 
     root = root->next;
     if(root != NULL)
     {
+        root->parent = temp_par;
         printAST(root, outfile);
         // root = root->next;
     }
+    // printf("\n line 287 \n");
 }
 
 void runParser(FILE *fp2)
@@ -348,15 +365,17 @@ void runParser(FILE *fp2)
         }
     }
 
-    // printf("%s\n",root->value);
-    // createAST(root);
+    printf("\n ROOT VALUE %s\n",root->value);
+    //createAST(root);
     // printf("\nLMAOO DED\n");
     // // printf("%s",root->value);
     // //printParseTree(root,stdout);
     // fprintf(fp2, "AST TREE:\n");
     // // printParseTree(root, fp2);
     // //  printf("VALUE OF ADDR BEFORE:%s\n",root->addr->value);
-    printAST(root, fp2);
+    // printf("Before print AST \n");
+    //printAST(root, fp2);
+    // printf("\n after print AST \n");
     // printf("VALUE OF ADDR AFTER:%s\n",root->addr->value);
     free(element);
     free(tree_node);
@@ -535,6 +554,8 @@ int main(int argc, char *argv[])
             break;
         case 6:
             createAST(root);
+            FILE *fp2 = fopen(argv[2], "w");
+            printAST(root,fp2);
             fn_table = initFST(0);
             fn_table_pass1 = initFST(0);
             if(root==NULL) printf("ROOT IS NULL\n");
@@ -553,18 +574,77 @@ int main(int argc, char *argv[])
             temporaries_st=initST(0);
             IRcodegenerate(root);
             printf("After code generate\n");
-            // for(int i=0;i<count;i++){
-            //     printf("Operator is:%s\n",quadTable[i].op);
-            //     printf("Dikkat here\n");
-            //     if(quadTable[i].arg1.arg_var!=NULL)
-            //         printf("Arg 1 is:%s\n",quadTable[i].arg1.arg_var->id_lexeme);
-            //     if(quadTable[i].arg2.arg_var!=NULL)
-            //         printf("Arg 2 is:%s\n",quadTable[i].arg2.arg_var->id_lexeme);
-            //     if(quadTable[i].result.arg_var!=NULL)
-            //         printf("Result is:%s\n",quadTable[i].result.arg_var->id_lexeme);
-            //     if(quadTable[i].instruction!=NULL)
-            //         printf("Instruction is:%s\n",quadTable[i].instruction);
-            // }
+            //printf("Label:%s\n",quadTable[1].label);
+            for(int i=0;i<count;i++){
+                printf("%d)",i+1);
+                //for label
+                if(quadTable[i].label!=NULL)
+                    printf("Label is:%s ",quadTable[i].label);
+
+                //for goToLabel
+                if(quadTable[i].goTolabel!=NULL)
+                    printf("GoTo is:%s ",quadTable[i].goTolabel);
+
+                //for Operator
+                if(strcmp(quadTable[i].op,""))
+                    printf("Operator is:%s ",quadTable[i].op);
+                
+                //for arg1
+                if(quadTable[i].arg1.entry == 0 && quadTable[i].arg1.arg.arg_var!=NULL)
+                    printf("Arg1 is:%s ",quadTable[i].arg1.arg.arg_var->id_lexeme);
+                else if(quadTable[i].arg1.entry == 1)
+                    printf("Arg1 is:%d ",quadTable[i].arg1.arg.arg_num);
+                else if(quadTable[i].arg1.entry == 2)
+                    printf("Arg1 is:%f ",quadTable[i].arg1.arg.arg_rnum);
+                else if(quadTable[i].arg1.arg.arg_bool!=NULL)
+                    printf("Arg1 is:%s ",quadTable[i].arg1.arg.arg_bool);
+
+                //for index1
+                if(quadTable[i].index1.entry == 0 && quadTable[i].index1.arg.arg_var!=NULL)
+                    printf("Index1 is:%s ",quadTable[i].index1.arg.arg_var->id_lexeme);
+                else if(quadTable[i].index1.entry == 1)
+                    printf("Index1 is:%d ",quadTable[i].index1.arg.arg_num);
+                else if(quadTable[i].index1.entry == 2)
+                    printf("Index1 is:%f ",quadTable[i].index1.arg.arg_rnum);
+                else if(quadTable[i].index1.arg.arg_bool!=NULL)
+                    printf("Index1 is:%s ",quadTable[i].index1.arg.arg_bool);
+
+                //for index2
+                if(quadTable[i].index2.entry == 0 && quadTable[i].index2.arg.arg_var!=NULL)
+                    printf("Index2 is:%s ",quadTable[i].index2.arg.arg_var->id_lexeme);
+                else if(quadTable[i].index2.entry == 1)
+                    printf("Index2 is:%d ",quadTable[i].index2.arg.arg_num);
+                else if(quadTable[i].index2.entry == 2)
+                    printf("Index2 is:%f ",quadTable[i].index2.arg.arg_rnum);
+                else if(quadTable[i].index2.arg.arg_bool!=NULL)
+                    printf("Index2 is:%s ",quadTable[i].index2.arg.arg_bool);
+
+                //for arg2
+                if(quadTable[i].arg2.entry == 0 && quadTable[i].arg2.arg.arg_var!=NULL)
+                    printf("Arg2 is:%s ",quadTable[i].arg2.arg.arg_var->id_lexeme);
+                else if(quadTable[i].arg2.entry == 1)
+                    printf("Arg2 is:%d ",quadTable[i].arg2.arg.arg_num);
+                else if(quadTable[i].arg2.entry == 2)
+                    printf("Arg2 is:%f ",quadTable[i].arg2.arg.arg_rnum);
+                else if(quadTable[i].arg2.arg.arg_bool!=NULL)
+                    printf("Arg2 is:%s ",quadTable[i].arg2.arg.arg_bool);
+                
+                //for result
+                if(quadTable[i].result.entry == 0 && quadTable[i].result.arg.arg_var!=NULL)
+                    printf("Result is:%s ",quadTable[i].result.arg.arg_var->id_lexeme);
+                else if(quadTable[i].result.entry == 1)
+                    printf("Result is:%d ",quadTable[i].result.arg.arg_num);
+                else if(quadTable[i].result.entry == 2)
+                    printf("Result is:%f ",quadTable[i].result.arg.arg_rnum);
+                else if(quadTable[i].result.arg.arg_bool!=NULL)
+                    printf("Result is:%s ",quadTable[i].result.arg.arg_bool);
+                
+                //for instruction
+                if(quadTable[i].instruction!=NULL)
+                    printf("Instruction is:%s ",quadTable[i].instruction);
+
+                printf("\n");
+            }
             break;
         default:
             printf("\n choose one of the given options\n");

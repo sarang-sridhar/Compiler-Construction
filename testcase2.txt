@@ -7,3 +7,5 @@ declare A:array [1..15] of real;
 x:=y+z;
 x:=A[3];
 end
+
+

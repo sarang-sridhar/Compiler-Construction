@@ -3,6 +3,7 @@
 #define QUAD_SIZE 5000
 #define TEMP_LEN 10
 
+
 union argument
 {
     ST_ENTRY* arg_var;
@@ -11,15 +12,27 @@ union argument
     char* arg_bool;
 };
 
+/*
+entry is 0 for:ID
+         1 for:NUM
+         2 for:RNUM
+         3 for:BOOL
+*/
+
+typedef struct QuadEntry 
+{
+    union argument arg;
+    int entry;// indicates which union field is populated
+}qEn;
+
 typedef struct Quadruple
 {
-    char op[7];
-    int filled; //0 for arg_var, 1 for arg_num, 2 for arg_rnum, 3 for arg_bool
-    union argument arg1;
-    union argument arg2;
-    union argument index1;
-    union argument index2;
-    union argument result;
+    char op[20];
+    qEn arg1;
+    qEn arg2;
+    qEn index1;
+    qEn index2;
+    qEn result;
     FN_ENTRY* arg_fn_name; //for function table entry
     char* goTolabel; //jump to this label
     char* instruction;  //if or goTO or blah blah

@@ -79,6 +79,8 @@ struct entry
     int is_array; // 0- not array 1-array
     int is_for; // 0- not for 1-for
     int offset;
+    int scope_start;
+    int scope_end;
     int width;
     TYPE type;
     char *id_lexeme;

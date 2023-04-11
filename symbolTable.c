@@ -49,6 +49,7 @@ void insert_in_table(struct id_symbol_table* table,  ST_ENTRY * entry){
             temp=temp->next;
         }
         temp->next = entry;
+        entry->next=NULL;
         return;
     }
 }
@@ -163,6 +164,7 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
         temp->type = t1;
         temp->last_assigned_nesting=-1;
 
+
         insert_in_table(table,temp);
         node->symbol_table_entry=temp;
         printf("Node's symbol table entry:%s\n",node->symbol_table_entry->id_lexeme);
@@ -207,6 +209,7 @@ FN_ENTRY* create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct tr
         temp->op_head = op_list;
         temp->fn_name = node->tk_data.lexeme;
         temp->child_table = NULL;
+        temp->next = NULL;
         
         insert_fn_in_table(table,temp);
         node->function_table_entry = temp;

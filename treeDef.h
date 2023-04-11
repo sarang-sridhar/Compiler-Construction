@@ -20,6 +20,7 @@ struct treeNode
     int line_no;
     int visited; //1 if visited, 0 if not visited
     int entry_visited; // 1 means visited
+    int while_visited;//1 means visited while expr
     char value[23]; //token name
     int isTerminal;
     struct treeNode* children;
@@ -41,6 +42,9 @@ struct treeNode
     char* true_label; //true label for boolean expression
     char* false_label; //false label for boolean expression
     char* constructLabel; //label for every construct
+    char* for_construct_label; //label for for's condition in order to jump
+    char* for_increment_label; //label for for's increment operation
+    int isDefault;
     ST_ENTRY* temp_variable_entry;  
     ST_ENTRY* symbol_table_entry; 
     FN_ENTRY* function_table_entry; 

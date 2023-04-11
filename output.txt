@@ -1,4 +1,0 @@
-EPSILON
-moduleDeclarations
-program
-startprogram

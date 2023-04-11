@@ -4,13 +4,13 @@
 
 <<<driver program>>>
 start
-	declare x, y, z:integer;
+	declare x,y, z:integer;
 	declare a, b, c:integer;
-	a:= x;
-	b:= y;
+	a:= 5;
+	b:= 9;
 	get_value(x);
 	get_value(y);
-	z:= x + y*b +(a-b)*y+ a*a - b*x;	
+	z:= x + y*b +(a-b)*y+ a*2 - b*x;	
         print(z);
 end
 
@@ -25,8 +25,3 @@ Output: 9
 Similarly run the generated assembly code for other input values and verify.
 
 **
-
-
-
-
-

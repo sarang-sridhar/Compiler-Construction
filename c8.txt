@@ -44,15 +44,3 @@ Output: -38
 	
 Similarly run the generated assembly code for other input values and verify.
 **
-
-
-
-
-
-
-
-
-
-
-
-

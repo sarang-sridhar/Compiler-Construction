@@ -7,9 +7,34 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 */
 #include "tree.h"
 
+void initTreeNode(struct treeNode* node){
+    if(node==NULL)return;
+    node->visited = 0;
+    node->children=NULL;
+    node->parent=NULL;
+    node->nextSibling=NULL;
+    node->prevSibling=NULL;
+    node->astnextSibling=NULL;
+    node->astprevSibling=NULL;
+    node->inh=NULL;
+    node->syn=NULL;
+    node->addr = NULL;
+    node->next=NULL;
+    node->pair=NULL;
+    node->type_syn=NULL;
+    node->type_inh=NULL;
+    node->symbol_table_entry=NULL;
+    node->temp_variable_entry=NULL;
+    node->function_table_entry=NULL;
+    node->isChildOfAssign = 0;
+    node->isDefault = 0;
+}
+
+
 void addChild(struct treeNode *parent, struct node *child)
 {
     struct treeNode *temp = malloc(sizeof(struct treeNode));
+    initTreeNode(temp);
     strcpy(temp->value, child->value);
     temp->visited = 0;
     temp->addr = NULL;
@@ -35,6 +60,7 @@ void addChild(struct treeNode *parent, struct node *child)
     while (child != NULL)
     {
         struct treeNode *temp2 = malloc(sizeof(struct treeNode));
+        initTreeNode(temp2);
         strcpy(temp2->value, child->value);
         if (!strcmp(child->value, "DOLLAR"))
             temp2->children = NULL;

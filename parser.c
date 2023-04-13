@@ -1,4 +1,5 @@
 /*
+Group : 11
 ID: 2020A7PS0297P                             NAME: Sarang Sridhar 
 ID: 2020A7PS0995P                             NAME: Kashish Mahajan 
 ID: 2020A7PS0993P                             NAME: Satvik Sinha 
@@ -61,6 +62,7 @@ int checkFollow(){
 //function for displaying error while parsing
 void display_error(int type)
 {
+   programHasParsingError=1;
    printf("Parsing error at line no. %d\n", global_token.line_no);
    errorToken = 1;
    generateToken = 0;

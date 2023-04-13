@@ -1,3 +1,11 @@
+/*
+Group : 11
+ID: 2020A7PS0297P                             NAME: Sarang Sridhar 
+ID: 2020A7PS0995P                             NAME: Kashish Mahajan 
+ID: 2020A7PS0993P                             NAME: Satvik Sinha 
+ID: 2020A7PS0036P                             NAME: Aarya Attrey
+ID: 2020A7PS0017P                             NAME: Urvashi Sharma 
+*/
 #include "symbolTable.c"
 
 // to populate symbol table and open new symbol tables
@@ -17,7 +25,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         if (!strcasecmp(node->value, "ID"))
         {
             // printf("\n**get lexeme called for:%s \n",node->tk_data.lexeme);
-            ST_ENTRY *temp = get_lexeme(table, node->tk_data.lexeme);
+            ST_ENTRY *temp = get_lexeme(table, node->tk_data.lexeme,node->line_no);
            
             // printf("\n**get lexeme after call for:%s \n", node->tk_data.lexeme);
             if(temp==NULL){
@@ -32,7 +40,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
             if(temp->is_for == 1)
                 datatype = "INTEGER";
             else if(temp->is_array==1){
-                printf("\n Array operand not allowed \n");
+                printf("\n****Error:Array operand not allowed, line no : %d, from here****\n",node->line_no);
                 return -1;
             }
             else
@@ -83,7 +91,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         if (!strcasecmp(node->value, "ARRAY_ACCESS"))
         {   
         int ans;
-        ST_ENTRY *temp = get_lexeme(table, node->children->tk_data.lexeme);
+        ST_ENTRY *temp = get_lexeme(table, node->children->tk_data.lexeme,node->children->line_no);
         if(temp==NULL){
             return -1;
         }
@@ -112,12 +120,12 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
             int arr_index = node->children->astnextSibling->tk_data.val;
             if (arr_index >= lr && arr_index < hr)
             {
-                printf("\n Array index: %d falls in range, ans = %d ", node->children->astnextSibling->tk_data.val,ans);
+                // printf("\n Array index: %d falls in range, ans = %d ", node->children->astnextSibling->tk_data.val,ans);
 
             }
             else
             {
-                printf("\n Array index: %d not in range ", node->children->astnextSibling->tk_data.val);
+                printf("\n****Error:Array index: %d not in range, line no: %d****", node->children->astnextSibling->tk_data.val,node->children->line_no);
                 return -1;
             }
         }
@@ -160,7 +168,8 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         else
         {
             
-            printf("\n Incompatible addition/subtraction %s leftOp:%d rightOp:%d \n",node->value,leftOpType,rightOpType);
+            // printf("\n Incompatible addition/subtraction %s leftOp:%d rightOp:%d \n",node->value,leftOpType,rightOpType);
+            printf("\n Incompatible addition/Subtraction");
             return -1;
         }
     }
@@ -238,12 +247,13 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
         //printf("\nYAHA POHOHCHA\n");
         struct treeNode* lchild = root->children;
         struct treeNode* rchild = root->children->astnextSibling;
-        ST_ENTRY* lentry = get_lexeme(table,lchild->tk_data.lexeme);
-        ST_ENTRY* rentry = get_lexeme(table,rchild->tk_data.lexeme);
+        ST_ENTRY* lentry = get_lexeme(table,lchild->tk_data.lexeme,lchild->line_no);
+        ST_ENTRY* rentry = get_lexeme(table,rchild->tk_data.lexeme,rchild->line_no);
+        if(lentry==NULL || rentry==NULL)return -1;
         if(lentry!=NULL && rentry!=NULL){
             lchild->symbol_table_entry=lentry;
             rchild->symbol_table_entry=rentry;
-            printf("\n**Entered here for:%s ",lchild->tk_data.lexeme);
+            // printf("\n**Entered here for:%s ",lchild->tk_data.lexeme);
             if(lentry->is_array ==1 && rentry->is_array == 1){
                 // printf("\n inside is array \n");
                 if(!strcasecmp(lentry->type.arr_type.arr_dt,rentry->type.arr_type.arr_dt)){
@@ -255,25 +265,25 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
                         int hr1 = lentry->type.arr_type.highRange.end;
                         int hr2 = rentry->type.arr_type.highRange.end;
                         if((hr1-lr1)==(hr2-lr2)){
-                            printf("\n Assignment statement type match(array) line no : %d \n ",root->children->line_no);
+                            // printf("\n Assignment statement type match(array) line no : %d \n ",root->children->line_no);
                             return 1;
                         }
                     }
                 }
                 else{
-                    printf("\n Assignment statement type mismatch(array) line no : %d ",root->children->line_no);
+                    printf("\n ***Error: Assignment statement type mismatch(array) line no : %d****\n ",root->children->line_no);
                     return -1;
                 }
             }
 
             if(lentry->is_array + rentry->is_array > 0){
-                printf("\n Assignment statement type mismatch(array - id) line no : %d ",root->children->line_no);
+                printf("\n ****Error:Assignment statement type mismatch(array - id) line no : %d**** ",root->children->line_no);
                 return -1;
             }
         }
     }
      
-        ST_ENTRY *temp = get_lexeme(table, lchild->tk_data.lexeme);
+        ST_ENTRY *temp = get_lexeme(table, lchild->tk_data.lexeme,lchild->line_no);
         if(temp==NULL){
             return -1;
         }
@@ -282,7 +292,7 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
         if(temp->is_for == 1)
             datatype = "INTEGER";
         else if(temp->is_array == 1){
-            printf("Array operand not allowed \n");
+            printf("\n****Error:Array operand not allowed, line no : %d**** \n",lchild->line_no);
             return -1;
         }
         else 
@@ -308,19 +318,19 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
         // printf("rval is:%d \n",rval);
         if (lval == rval)
         {
-            printf("\n Assignment statement type match, line no : %d \n",root->children->line_no);
+            // printf("\n Assignment statement type match, line no : %d \n",root->children->line_no);
             return 1;
         }
         else
         {
-            printf("\n Assignment statement type mis-match, line no : %d \n",root->children->line_no);
+            printf("\n****Error: Assignment statement type mis-match, line no : %d**** \n",root->children->line_no);
             return -1;
         }
     }
     else if (!strcasecmp(root->value, "LVALUEARRAY"))
     { // lchild will be array access
     
-        ST_ENTRY *temp = get_lexeme(table, lchild->children->tk_data.lexeme);
+        ST_ENTRY *temp = get_lexeme(table, lchild->children->tk_data.lexeme,lchild->children->line_no);
         if(temp==NULL){
             return -1;
         }
@@ -346,12 +356,12 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
             int arr_index = root->children->children->astnextSibling->tk_data.val;
             if (arr_index >= lr && arr_index <= hr)
             {
-                printf("\n Array index: %d falls in range, ", root->children->children->astnextSibling->tk_data.val);
+                // printf("\n Array index: %d falls in range, ", root->children->children->astnextSibling->tk_data.val);
 
             }
             else
             {
-                printf("\n Array index: %d not in range ", root->children->children->astnextSibling->tk_data.val);
+                printf("\n****Error: Array index: %d not in range, line no: %d**** \n", root->children->children->astnextSibling->tk_data.val,lchild->children->line_no);
                 return -1;
             }
         }
@@ -367,12 +377,13 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
         int rval = get_type(lchild->astnextSibling, table);
         if (lval == rval)
         {
-            printf("\n Assignment statement type match, types = %d, line no: %d ", lval,root->children->children->line_no);
+            // printf("\n Assignment statement type match, types = %d, line no: %d ", lval,root->children->children->line_no);
             return 1;
         }
         else
         {
-            printf("\n Assignment statement type mis-match, lval type = %d, rval type = %d,line no %d ", lval, rval,root->children->children->line_no);
+            // printf("\n****Error: Assignment statement type mis-match, lval type = %d, rval type = %d,line no %d ****", lval, rval,root->children->children->line_no);
+            printf("\n****Error: Assignment statement type mis-match, line no %d ****",root->children->children->line_no);
             return -1;
         }
     }
@@ -384,7 +395,7 @@ int check_while(struct treeNode *root, struct id_symbol_table *table)
     int type = get_type(root->children, table);
     if (type == 2)
     {
-        printf("\n While condition is boolean \n");
+        // printf("\n While condition is boolean \n");
         return 1;
     }
     else
@@ -401,7 +412,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
     FN_ENTRY *func = get_func_name(fn_table, root->children->tk_data.lexeme);
     if (func == NULL)
     {
-        printf("Function not defined/declared \n");
+        printf("\n****Error:Function not defined/declared,line no : %d****\n",root->children->line_no);
         return -1;
     }
     
@@ -409,7 +420,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
     if(table->parent_function!=NULL){
         FN_ENTRY* fn = table->parent_function;
         if(!strcasecmp(func->fn_name,fn->fn_name)){
-            printf("\n Recursive function call ");
+            printf("\n****Error: Recursive function call line no : %d****\n ",root->children->line_no);
             return -1;
         }
     }
@@ -419,7 +430,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
     //printf("Function is:%s and is_declared:%d \n",func->fn_name,func->is_declared);
     if(func->is_declared == 1 && func->ip_head!=NULL && func->is_valid!=1){
         func->is_valid = 0;
-        printf("Error:Redundant Defintion of function\n");
+        printf("\n****Error:Redundant Defintion of function %s, line no:%d****\n",func->fn_name,root->children->line_no);
         return -1;
     }
     
@@ -455,27 +466,29 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         }
         
         // printf("\n inside check function call, the lexeme going into get_lexeme is '%s' \n",called_op_list->tk_data.lexeme);
-        ST_ENTRY *op_entry = get_lexeme(table, called_op_list->tk_data.lexeme);
+        ST_ENTRY *op_entry = get_lexeme(table, called_op_list->tk_data.lexeme,called_op_list->line_no);
         if(op_entry==NULL){
             return -1;
         }
         // if(op_entry==NULL)printf("\n OP ENTRY IS NULL \n");
         if(op_entry->is_for==1){
+            printf("\n****Error: For loop variable cannot be an output parameter, line no: %d ****\n", root->children->line_no);
+            return -1;
             if(strcasecmp(defined_op_list->parameter_type.id_type.id_dt,"INTEGER")){
                 comparison_flag_type_checking = 1;
-                printf("\n type doesnt match in function call, line no: %d \n", root->children->line_no);
+                printf("\n*****Error: type doesnt match in function call, line no: %d***** \n", root->children->line_no);
                 return -1;
             }
         }
         else if(op_entry->is_array == 1){
             comparison_flag_type_checking = 1;
-            printf("\n Error: Array cannot be an output parameter, line no: %d \n", root->children->line_no);
+            printf("\n**** Error: Array cannot be an output parameter, line no: %d ****\n", root->children->line_no);
             return -1;
         }
         else if (strcasecmp(defined_op_list->parameter_type.id_type.id_dt, op_entry->type.id_type.id_dt)) // if comparison results in non 0 meaning both arent the same hence error
         {
             comparison_flag_type_checking = 1;
-            printf("\n type doesnt match in function call, line no: %d \n", root->children->line_no);
+            printf("\n****Error: type doesnt match in function call, line no: %d ****\n", root->children->line_no);
             return -1;
         }
         //printf("\nEnd of while,%s\n",defined_op_list->parameter_name);
@@ -528,7 +541,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
             if(!strcasecmp(actual_child->value,"ID")){
                 // printf("\n line 511 \n");
                 // printf("\n inside check function call, the lexeme going into get_lexeme for ip_entry is '%s' \n",actual_child->tk_data.lexeme);
-                ST_ENTRY *ip_entry = get_lexeme(table, actual_child->tk_data.lexeme);
+                ST_ENTRY *ip_entry = get_lexeme(table, actual_child->tk_data.lexeme,actual_child->line_no);
                 if(ip_entry==NULL){
                     // printf("\n line 514 \n");
                     return -1;
@@ -577,7 +590,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
             // printf("\n line 545 \n");
             if(comparison_flag_type_checking){
                 // printf("\nbefore error\n");
-                printf("\n type doesnt match in function call, line no: %d \n", root->children->line_no);
+                printf("\n ****Error:type doesnt match in function call, line no: %d**** \n", root->children->line_no);
                 // printf("\n after error 549\n ");
                 return -1;
             }
@@ -587,7 +600,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         {
 
             
-            ST_ENTRY *ip_entry = get_lexeme(table, actual_child->children->tk_data.lexeme);
+            ST_ENTRY *ip_entry = get_lexeme(table, actual_child->children->tk_data.lexeme,actual_child->children->line_no);
             if(ip_entry==NULL){
                     return -1;
                 }
@@ -595,7 +608,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
                 comparison_flag_type_checking =1;
             }
             if(comparison_flag_type_checking){
-                printf("\n type doesnt match in function call, line no: %d \n", root->children->line_no);
+                printf("\n ****Error:type doesnt match in function call, line no: %d ****\n", root->children->line_no);
                 return -1;
             }
             int lr = ip_entry->type.arr_type.lowRange.start;
@@ -605,12 +618,12 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
                 int arr_index = actual_child->children->astnextSibling->tk_data.val;
                 if (arr_index >= lr && arr_index < hr)
                 {
-                    printf("\n Array index: %d falls in range", actual_child->children->astnextSibling->tk_data.val);
+                    // printf("\n Array index: %d falls in range", actual_child->children->astnextSibling->tk_data.val);
 
                 }
                 else
                 {
-                    printf("\n Array index: %d not in range ", actual_child->children->astnextSibling->tk_data.val);
+                    printf("****Error:\n Array index: %d not in range****,line no : %d \n ", actual_child->children->astnextSibling->tk_data.val,actual_child->children->line_no);
                     return -1;
                 }
             }
@@ -636,16 +649,16 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
 
 
     // printf("\n before all types match \n");
-    printf("\n All types match in function call, line no: %d \n", root->children->line_no);
+    // printf("\n All types match in function call, line no: %d \n", root->children->line_no);
     return 1; // all types match
 }
 
 int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
 {
-    printf("Entered type check - switch case \n");
+    // printf("Entered type check - switch case \n");
     // conditionalStmt.syn = make_new_node(“SWITCH”,ID.addr, caseStmt.syn,default.syn);
     struct treeNode *switch_id = root->children;
-    ST_ENTRY *temp = get_lexeme(table, switch_id->tk_data.lexeme);
+    ST_ENTRY *temp = get_lexeme(table, switch_id->tk_data.lexeme,switch_id->line_no);
     if(temp==NULL){
         return -1;
     }
@@ -661,7 +674,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
     int switch_type;
     if (!strcasecmp(datatype, "REAL"))
     {
-        printf("\n Switch case cant have real value ");
+        printf("\n***Error:Switch case cant have real value,line no:%d****\n",root->children->line_no); 
         return -1;
     }
     else
@@ -686,7 +699,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
                 // }
                 if(switch_type!=0)
                 {
-                    printf("\n Switch type is not integer, case type is integer");
+                    printf("\n*** Error:Switch type is not integer, case type is integer %d***\n",root->children->line_no);
                     return -1;
                 }
             }
@@ -698,19 +711,19 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
                 // }
                 if(switch_type!=2)
                 {
-                    printf("\n Switch type is not boolean, case type is boolean");
+                    printf("\n***Error:Switch type is not boolean, case type is boolean, line no : %d***\n",root->children->line_no);
                     return -1;
                 }
             }
             caseList = caseList->next;
         }
         struct treeNode *defaultNode = switch_id->astnextSibling->astnextSibling;
-        printf("Switch type is:%d \n",switch_type);
+        // printf("Switch type is:%d \n",switch_type);
         if (switch_type == 0)
         {
             if (defaultNode == NULL)
             {
-                printf("\n Switch cases for integer type must have default statement");
+                printf("\n****Error:Switch cases for integer type must have default statement,line no: %d****\n",root->children->line_no);
                 return -1;
             }
         }
@@ -718,7 +731,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
         {
             if (defaultNode != NULL)
             {
-                printf("\n Switch cases for boolean type must not have default statement");
+                printf("\n****Error:Switch cases for boolean type must not have default statement, line no : %d***\n",root->children->line_no);
                 return -1;
             }
         }
@@ -738,7 +751,7 @@ void check_for_variable(struct treeNode* root,struct id_symbol_table* table){
             while(temp!=NULL){
                 if(!strcmp(temp->id_lexeme,str)){
                     if(temp->is_for==1){
-                        printf("FOR's variable cannot be assigned a value, line no : %d \n",root->children->line_no);
+                        printf("\n****Error:FOR's variable cannot be assigned a value, line no : %d**** \n",root->children->line_no);
                     }
                 }
                 temp = temp->next;
@@ -759,7 +772,7 @@ int check_while_assignment(struct treeNode* root,struct id_symbol_table* table,i
         ST_ENTRY* temp = table->arr[hash_value];
             while(temp!=NULL){
                 if(!strcmp(temp->id_lexeme,root->tk_data.lexeme)){
-                    printf("While condn being checked for:%s and last assigned nesting:%d \n",temp->id_lexeme,temp->last_assigned_nesting);
+                    // printf("While condn being checked for:%s and last assigned nesting:%d \n",temp->id_lexeme,temp->last_assigned_nesting);
                     if(temp->last_assigned_nesting>=expr_nesting && temp->is_array==0){
                         return 1;
                     }
@@ -910,10 +923,11 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
         block->type = temp->parameter_type;
         block->is_array=temp->is_array;
         block->is_for=0;
+        block->isList=1;
         if(temp->is_array==1){
             if(temp->parameter_type.arr_type.isStatic==1){
                 block->offset=offset;
-                printf("INPUT LIST : Offset for:%s in ip list is:%d \n",name,offset);
+                // printf("INPUT LIST : Offset for:%s in ip list is:%d \n",name,offset);
                 int lr = temp->parameter_type.arr_type.lowRange.start;
                 int hr = temp->parameter_type.arr_type.highRange.end;
                 if(lr >hr)
@@ -935,7 +949,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
         else{
             //is id
             block->offset = offset;
-            printf("INPUT LIST : Offset for:%s in ip list is:%d \n",name,offset);
+            // printf("INPUT LIST : Offset for:%s in ip list is:%d \n",name,offset);
 
             char* datatype = temp->parameter_type.id_type.id_dt;
             if(!strcasecmp(temp->parameter_type.id_type.id_dt,"INTEGER")){
@@ -953,10 +967,11 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             } 
         }
 
-            
+        if(global_max_offset < offset)
+            global_max_offset = offset;
 
         insert_in_table(child_table,block);
-        printf("Entry done for:%s, line no : %d \n",name,root->children->line_no);
+        // printf("Entry done for:%s, line no : %d \n",name,root->children->line_no);
         temp = temp->next;
         }
        // printf("After creating entries\n");
@@ -987,11 +1002,12 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             block->next = NULL;
             block->type = temp2->parameter_type;
             block->is_array=temp2->is_array;
+            block->isList=1;
 
             if(temp2->is_array==1){
             if(temp2->parameter_type.arr_type.isStatic==1){
                 block->offset=offset;
-                printf("OUTPUT LIST : Offset for:%s in op list is:%d \n",name,offset);
+                // printf("OUTPUT LIST : Offset for:%s in op list is:%d \n",name,offset);
 
                 int lr = temp2->parameter_type.arr_type.lowRange.start;
                 int hr = temp2->parameter_type.arr_type.highRange.end;
@@ -1012,7 +1028,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
         else{
             //is id
             block->offset = offset;
-            printf("OUTPUT LIST : Offset for:%s in ip list is:%d \n",name,offset);
+            // printf("OUTPUT LIST : Offset for:%s in ip list is:%d \n",name,offset);
 
             char* datatype = temp2->parameter_type.id_type.id_dt;
             if(!strcasecmp(temp2->parameter_type.id_type.id_dt,"INTEGER")){
@@ -1030,8 +1046,10 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             } 
         }
 
+            if(global_max_offset < offset)
+                global_max_offset = offset;
             insert_in_table(child_table,block);
-            printf("Entry done for:%s, %d \n",name,root->children->line_no);
+            // printf("Entry done for:%s, %d \n",name,root->children->line_no);
             temp2 = temp2->next;
         }
 
@@ -1066,7 +1084,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             }
             //
             if(t!=NULL && t->is_used!=1){
-                printf("\n Output param:%s not assigned value inside the function.",op_param);
+                printf("\n****Error: Output param:%s not assigned value inside the function %s****\n",op_param,child_table->parent_function->fn_name);
             }
             temp3 = temp3->next;
         }
@@ -1140,8 +1158,10 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 temp->is_array=0;
                 temp->is_for = 1;
                 temp->offset=offset;
-                printf("Offset for:%s is %d \n",root->children->tk_data.lexeme,offset);
+                // printf("Offset for:%s is %d \n",root->children->tk_data.lexeme,offset);
                 offset+=2;
+                if(global_max_offset < offset)
+                    global_max_offset = offset;
                 temp->width=2;
                 root->children->symbol_table_entry=temp; //symbol table entry for conditional variable node of "for"
             }
@@ -1170,7 +1190,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             while(statements!=NULL && flag_for_for_in_semantic_analysis){
                 if(!strcasecmp(statements->value, "LVALUEID")){
                     if(!strcasecmp(statements->children->tk_data.lexeme,child1->tk_data.lexeme)){
-                        printf("\n ERROR: FOR STATEMENT REDEFINING VARIABLE, LINE NO %d \n",statements->children->line_no);
+                        // printf("\n ERROR: FOR STATEMENT REDEFINING VARIABLE, LINE NO %d \n",statements->children->line_no);
                         flag_for_for_in_semantic_analysis=0;
                         // if(root->next!=NULL)semanticAnalysis(root->next, child_table, nesting_num);
                         //     return;
@@ -1319,8 +1339,9 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                             temp->width=1;
                         }
                     }
-
-                    printf("Offset for:%s is %d \n",temp->id_lexeme,temp->offset);
+                    if(global_max_offset < offset)
+                        global_max_offset = offset;
+                    // printf("Offset for:%s is %d \n",temp->id_lexeme,temp->offset);
                 }
                 idList = idList->next;
             }
@@ -1363,7 +1384,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             struct treeNode* while_expr = root->children;
             int is_while_assigned = check_while_assignment(while_expr,id_table,nesting_num+1);
             if(is_while_assigned == 0)
-                printf("Error: No variable in expression of while was assigned a value\n");
+                printf("\n****Error: No variable in expression of while was assigned a value****\n");
 
             root = root->next;
             if (root != NULL)
@@ -1394,6 +1415,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             {
                 // value->pair = stmts
                 struct id_symbol_table *child_table = initST(nesting_num + 1);
+                child_table->scope_start=root->children->line_no;
                 child_table->parent_table = id_table;
                 if (id_table->child_table == NULL)
                 {
@@ -1414,11 +1436,11 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 //id_table = child_table;
 
                 struct treeNode *stmts = caseList->pair;
-
                 while (stmts != NULL)
                 {
                     semanticAnalysis(stmts, child_table, nesting_num+1, offset);
                     //printf("\nREACHED HERE\n");
+                    
                     stmts = stmts->next;
                 }
                 // id_table = temp;
@@ -1451,7 +1473,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             }
             while (stmts != NULL)
             {
-                printf("Default is not NULL \n");
+                // printf("Default is not NULL \n");
                 semanticAnalysis(stmts, child_table, nesting_num+1, offset);
                 stmts = stmts->next;
             }
@@ -1513,7 +1535,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                         if(!strcmp(temp->id_lexeme,root->children->tk_data.lexeme)){
                             temp->is_used=1;
                             temp->last_assigned_nesting = nesting_num;
-                            printf("Nesting num set to: %d \n",nesting_num);
+                            // printf("Nesting num set to: %d \n",nesting_num);
                             is_used_set = 0;
                         }
                         temp = temp->next;
@@ -1535,9 +1557,10 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             if(root->children->astnextSibling->children->astnextSibling!=NULL){
                 struct treeNode* opList = root->children->astnextSibling->children;
                 while(opList!=NULL){
-                    ST_ENTRY* temp = get_lexeme(id_table,opList->tk_data.lexeme);
+                    ST_ENTRY* temp = get_lexeme(id_table,opList->tk_data.lexeme,opList->line_no);
                     if(temp!=NULL){
                         temp->is_used=1;
+                        temp->last_assigned_nesting=nesting_num;
                     }
                     opList = opList->next;
                 }
@@ -1554,7 +1577,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
 
         else if(!strcasecmp(root->value,"GET-VALUE")){
             struct treeNode* getVal = root->children;
-            ST_ENTRY* temp = get_lexeme(id_table,getVal->tk_data.lexeme);
+            ST_ENTRY* temp = get_lexeme(id_table,getVal->tk_data.lexeme,getVal->line_no);
             if(temp==NULL){
                 if(root->next!=NULL)semanticAnalysis(root->next, id_table, nesting_num, offset);
                 return;   
@@ -1572,13 +1595,13 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             //can be id/num/rnum/boolvar/arr-print
             ST_ENTRY* temp;
             if(!strcasecmp(root->children->value,"ARR-PRINT")){
-                temp=get_lexeme(id_table,root->children->children->tk_data.lexeme);
+                temp=get_lexeme(id_table,root->children->children->tk_data.lexeme,root->children->children->line_no);
                 if(temp!=NULL){
                     root->children->children->symbol_table_entry=temp;
                 }
             }
             else if(!strcasecmp(root->children->value,"ID")){
-                temp = get_lexeme(id_table,root->children->tk_data.lexeme);
+                temp = get_lexeme(id_table,root->children->tk_data.lexeme,root->children->line_no);
                 if(temp!=NULL){
                     root->children->symbol_table_entry=temp;
                 }

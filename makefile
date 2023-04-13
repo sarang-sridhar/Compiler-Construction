@@ -3,6 +3,14 @@
 #ID: 2020A7PS0993P                             NAME: Satvik Sinha 
 #ID: 2020A7PS0036P                             NAME: Aarya Attrey
 #ID: 2020A7PS0017P                             NAME: Urvashi Sharma 
+# Group : 11
+
 
 All:
-	gcc -o stage1exe driver.c
+	# gcc -o stage1exe driver.c
+	gcc-9 -o compiler driver2.c
+
+
+asm:
+	nasm -felf64 code.asm
+	gcc -no-pie code.o

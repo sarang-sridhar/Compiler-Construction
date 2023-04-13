@@ -1,14 +1,15 @@
 <<<driver program>>>
 start
-    declare m : integer;
-    switch(m)
-		start
-			case 10: declare A:real;
-			    break;
-			case 20: declare B: integer;
-				B:= m*2+3;
-				break;
-			default: m := 2;
-				 break;			 	
-		end
+    declare b : array [2..3] of integer;
+	get_value(b); 
 end
+
+
+
+
+
+
+
+
+
+

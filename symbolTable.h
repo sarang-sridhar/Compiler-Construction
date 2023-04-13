@@ -1,3 +1,11 @@
+/*
+Group : 11
+ID: 2020A7PS0297P                             NAME: Sarang Sridhar 
+ID: 2020A7PS0995P                             NAME: Kashish Mahajan 
+ID: 2020A7PS0993P                             NAME: Satvik Sinha 
+ID: 2020A7PS0036P                             NAME: Aarya Attrey
+ID: 2020A7PS0017P                             NAME: Urvashi Sharma 
+*/
 #include <stdio.h>
 
 #define TABLE_SIZE 1619
@@ -79,14 +87,12 @@ struct entry
     int is_array; // 0- not array 1-array
     int is_for; // 0- not for 1-for
     int offset;
-    int scope_start;
-    int scope_end;
     int width;
     TYPE type;
     char *id_lexeme;
     struct entry *next; // linear probing
     int last_assigned_nesting;
-
+    int isList; // 1 if it is a member of op list or ip list
 };
 
 struct id_symbol_table
@@ -99,6 +105,8 @@ struct id_symbol_table
     FN_ENTRY* parent_function;
     struct id_symbol_table *right_sibling;
     struct id_symbol_table *left_sibling;
+    int scope_start;
+    int scope_end;
 };
 
 struct fn_symbol_table
@@ -110,3 +118,5 @@ struct fn_symbol_table
 //declare function symbol table
 struct fn_symbol_table *fn_table; 
 struct fn_symbol_table* fn_table_pass1;
+
+int global_max_offset; //start populating offset of temporaries from this offset

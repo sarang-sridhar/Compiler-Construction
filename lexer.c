@@ -1,4 +1,5 @@
 /*
+Group : 11
 ID: 2020A7PS0297P                             NAME: Sarang Sridhar 
 ID: 2020A7PS0995P                             NAME: Kashish Mahajan 
 ID: 2020A7PS0993P                             NAME: Satvik Sinha 
@@ -413,6 +414,7 @@ char getnextchar(FILE *fp, char *buff1, char *buff2)
 void error_handle()
 {
     // //likha hai ye
+    programHasLexicalError=1;
     generateToken = 0;
     global_token.hasError = 1;
     global_token.line_no = current_line_no;

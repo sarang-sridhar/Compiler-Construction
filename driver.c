@@ -1,9 +1,10 @@
 /*
-ID: 2020A7PS0297P                             NAME: Sarang Sridhar
-ID: 2020A7PS0995P                             NAME: Kashish Mahajan
-ID: 2020A7PS0993P                             NAME: Satvik Sinha
+Group : 11
+ID: 2020A7PS0297P                             NAME: Sarang Sridhar 
+ID: 2020A7PS0995P                             NAME: Kashish Mahajan 
+ID: 2020A7PS0993P                             NAME: Satvik Sinha 
 ID: 2020A7PS0036P                             NAME: Aarya Attrey
-ID: 2020A7PS0017P                             NAME: Urvashi Sharma
+ID: 2020A7PS0017P                             NAME: Urvashi Sharma 
 */
 
 // #include "lexer.c"
@@ -563,7 +564,9 @@ int main(int argc, char *argv[])
                 printf("root's addr is:%s\n",root->addr->value);
                 fillDef(root->addr); //pass PROGRAM node
                 struct id_symbol_table* initial_table = initST(0);
+                global_max_offset = 0;
                 semanticAnalysis(root,initial_table,0,0);
+                printf("Global max offset is : %d\n",global_max_offset);
             }
             break;
         case 7:

@@ -1,16 +1,18 @@
 /*
-ID: 2020A7PS0297P                             NAME: Sarang Sridhar
-ID: 2020A7PS0995P                             NAME: Kashish Mahajan
-ID: 2020A7PS0993P                             NAME: Satvik Sinha
+Group : 11
+ID: 2020A7PS0297P                             NAME: Sarang Sridhar 
+ID: 2020A7PS0995P                             NAME: Kashish Mahajan 
+ID: 2020A7PS0993P                             NAME: Satvik Sinha 
 ID: 2020A7PS0036P                             NAME: Aarya Attrey
-ID: 2020A7PS0017P                             NAME: Urvashi Sharma
+ID: 2020A7PS0017P                             NAME: Urvashi Sharma 
 */
 
 // #include "lexer.c"
 #include "parser.c"
 #include "ast.c"
 #include "semanticAnalysis.c"
-// #include "IRCodeGen.c"
+#include "IRCodeGen.c"
+#include "codegen.c"
 #include<time.h>
 
 int noOfASTNodes = 0;
@@ -117,6 +119,7 @@ void print_choices()
     printf("\n 6. Activation record size :");
     printf("\n 7. Print Static Dynamic Arrays :");
     printf("\n 8. Error Analysis(Lexical, Syntax, Semantic) :");
+    printf("\n 9. Codegen :");
     printf("\n******\n");
 }
 
@@ -167,7 +170,7 @@ void totalTime()
     }
 
     if (!strcmp(s_top->value, "DOLLAR") && !errorToken)
-        printf("Parsing successful \n");
+        printf("\n Parsing successful \n");
     else if (errorToken)
         printf("Syntax Error\n");
     else
@@ -254,59 +257,61 @@ void printParseTree(struct treeNode *node, FILE *outfile, int flag)
 }
 
 // prints AST in inorder traversal
-void printAST(struct treeNode *root, FILE *outfile, int flag)
+void printAST(struct treeNode *root, FILE *outfile,int flag)
 {
-    // if flag 0 just count, if flag 1 then print
-    if (root == NULL){
+    if (root == NULL)
         return;
-    }
-    // printf("\n hi bye line 263 ai \n");
-    // printf("\n here line 287 root's value is %s \n", root->value
+    
+    if (root->children != NULL)
+        root->children->parent = root;
     printAST(root->children, outfile,flag);
-    // printf("\n here line 63 root's value is %s \n", root->value);
+
+    // printf("\n root's value inside print AST %s \n", root->value);
+
 
     if (root->addr != NULL)
     {
-        // printf("\n here line 266\n");
         printAST(root->addr, outfile,flag);
     }
     else
-    {
-        // printf("\n here line 272\n");
+    { 
+        if(!strcmp(root->value,"SWITCH")){
+            if(root->children->astnextSibling->astnextSibling!=NULL)
+                root->children->astnextSibling->astnextSibling->isDefault = 1; //setting isdefault one for deault ka node
+        }
+        // printf("\n came here \n");
         noOfASTNodes++;
         if(flag==1)fprintf(outfile, "%s\n", root->value);
     }
 
     if (root->children != NULL)
     {
-        // printf("\n here line 288\n");
         struct treeNode *temp;
         temp = root->children->astnextSibling;
+
         while (temp != NULL)
         {
-            // printf("\n here line 280\n");
+            temp->parent = root;
             printAST(temp, outfile,flag);
-            // printf("\n here line 286\n");
             temp = temp->astnextSibling;
         }
     }
 
+    struct treeNode * temp_par = root->parent;
+
     if(root->pair!=NULL){
-        // printf("\n here line 292 root's value is %s \n",root->value);
+        root->pair->parent = temp_par;
         printAST(root->pair, outfile,flag);
-        // printf("\n here line 294\n");
     }
 
     root = root->next;
     if(root != NULL)
     {
-        // printf("\n here line 291\n");
+        root->parent = temp_par;
         printAST(root, outfile,flag);
-        // printf("\n here line 293\n");
         // root = root->next;
     }
-    // if(root!=NULL)printf("\n here for %s  \n",root->value);
-    // else printf("\n here for root null \n");
+    // printf("\n line 287 \n");
 }
 
 void runParser()
@@ -381,7 +386,7 @@ void runParser()
     }
 
     if (!strcmp(s_top->value, "DOLLAR") && !errorToken)
-        printf("Parsing successful");
+        printf("\n Parsing successful \n");
     else if (errorToken)
         printf("Syntax Error\n");
     else
@@ -435,11 +440,11 @@ void printStaticDynamic(struct id_symbol_table*table,FN_ENTRY* parent_function){
         while(temp!=NULL){
             if(temp->is_array==1){
                 printf("\n\n");
-                printf("%-15s",parent_function->fn_name); // Scope- Module name
+                printf("%-15s",parent_function==NULL?"Driver":parent_function->fn_name); // Scope- Module name
                 // temporarily reducing scope line numbers to 3 digits
-                temp->scope_start=temp->scope_start%1000;
-                temp->scope_end=temp->scope_end%1000;
-                printf(" %5d-%-5d",temp->scope_start,temp->scope_end); // Scope- Line number
+                table->scope_start=table->scope_start%1000;
+                table->scope_end=table->scope_end%1000;
+                printf(" %5d-%-5d",table->scope_start,table->scope_end); // Scope- Line number
                 printf(" %-15s",temp->id_lexeme); // Name
                 if(temp->type.arr_type.isStatic==1){
                     printf(" %-10s","static"); // is static
@@ -464,16 +469,21 @@ void printForEntriesInTable(struct id_symbol_table*table,FN_ENTRY* parent_functi
         return;
     }
     ST_ENTRY *temp;
+
+
+    
+    // For printing ip/oiutput list first 
     for(int i=0;i<TABLE_SIZE;i++){
         temp = table->arr[i];
         while(temp!=NULL){
+            if(temp->isList==1){
             printf("\n\n");
-            printf("%-15s",temp->id_lexeme); // Name
-            printf(" %-15s",parent_function->fn_name); // Scope- Module name
+            printf("%-15s",temp->id_lexeme); 
+            printf(" %-15s",parent_function==NULL?"Driver":parent_function->fn_name); // Scope- Module name
             // temporarily reducing scope line numbers to 3 digits
-            temp->scope_start=temp->scope_start%1000;
-            temp->scope_end=temp->scope_end%1000;
-            printf(" %5d-%-5d",temp->scope_start,temp->scope_end); // Scope- Line number
+            table->scope_start=table->scope_start%1000;
+            table->scope_end=table->scope_end%1000;
+            printf(" %5d-%-5d",table->scope_start,table->scope_end); // Scope- Line number
             if(temp->is_array==1){
                 printf(" %-10s",temp->type.arr_type.arr_dt); // type
                 printf(" %-10s","yes"); // is_array
@@ -501,28 +511,87 @@ void printForEntriesInTable(struct id_symbol_table*table,FN_ENTRY* parent_functi
             }
             printf(" %-5d",temp->width); // width
             printf(" %-5d",temp->offset); // offset
-            printf(" %-5d",table->nesting_value);// nesting level
-            temp=temp->next;
+            printf(" %-5d",temp->isList==1?table->nesting_value-1:table->nesting_value);// nesting level
             printf("\n");
+            }
+            temp=temp->next;
+
+        }
+    }
+
+    for(int i=0;i<TABLE_SIZE;i++){
+        temp = table->arr[i];
+        while(temp!=NULL){
+            if(temp->isList!=1){
+            printf("\n\n");
+            printf("%-15s",temp->id_lexeme); 
+            printf(" %-15s",parent_function==NULL?"Driver":parent_function->fn_name); // Scope- Module name
+            // temporarily reducing scope line numbers to 3 digits
+            table->scope_start=table->scope_start%1000;
+            table->scope_end=table->scope_end%1000;
+            printf(" %5d-%-5d",table->scope_start,table->scope_end); // Scope- Line number
+            if(temp->is_array==1){
+                printf(" %-10s",temp->type.arr_type.arr_dt); // type
+                printf(" %-10s","yes"); // is_array
+                if(temp->type.arr_type.isStatic==1){
+                    printf(" %-10s","static"); // is_static
+                    printf(" %-1c[%7d-%-7d]%4c",' ',temp->type.arr_type.lowRange.start,temp->type.arr_type.highRange.end,' '); // range
+                }
+                else{
+                    printf(" %-10s","dynamic"); // is_static
+                    printf(" %-1c[%10s-%-10s]%4c",' ',temp->type.arr_type.lowRange.low_id,temp->type.arr_type.highRange.high_id,' '); // range
+                }
+
+            }
+            else if(temp->is_for==1){
+                printf(" %-10s","INTEGER"); // type
+                printf(" %-10s","no"); // is_array
+                printf(" %-10s","**"); // is_static
+                printf(" %-10c**%10c",' ',' '); // range
+            }
+            else{
+                printf(" %-10s",temp->type.id_type.id_dt); // type
+                printf(" %-10s","no"); // is_array
+                printf(" %-10s","**"); // is_static
+                printf(" %-10c**%10c",' ',' '); // range
+            }
+            printf(" %-5d",temp->width); // width
+            printf(" %-5d",temp->offset); // offset
+            printf(" %-5d",temp->isList==1?table->nesting_value-1:table->nesting_value);// nesting level
+            printf("\n");
+            }
+            temp=temp->next;
         }
     }
 
 }
 
-void printSymbolTable(struct fn_symbol_table *table,int flag){
+void printSymbolTable(struct fn_symbol_table *table,int flag,struct id_symbol_table*initial_table){
     if(table==NULL){
         return;
     }
     FN_ENTRY *temp;
     struct id_symbol_table*queue[20];
     int front=0,rear=0;
-    for(int i=0;i<TABLE_SIZE;i++){
-        temp=table->arr[i];
-        while(temp!=NULL){
+    int flag_driver=0;
+    for(int i=0;i<=TABLE_SIZE;i++){
+        // When i is table size all entries checked print driver Flag
+        if(i!=TABLE_SIZE)
+            temp=table->arr[i];
+        else{
+            temp=NULL;
+            flag_driver=1;
+        }
+        while(temp!=NULL || flag_driver){
         //Populate the queue initially;
             int size = 0;
             front=0,rear=0;
-            struct id_symbol_table* temp2 = temp->child_table;
+            struct id_symbol_table* temp2;
+            if(!flag_driver)
+                temp2=temp->child_table;
+            else
+                temp2=initial_table;
+            
             while(temp2!=NULL){
                 queue[rear++]=temp2;
                 temp2=temp2->right_sibling;
@@ -547,11 +616,12 @@ void printSymbolTable(struct fn_symbol_table *table,int flag){
                 }
 
             }
-            if(flag==2)printf("\n%s:%d\n",temp->fn_name,size);
-            temp = temp->next;
+            if(flag==2)printf("\n%s:%d\n",temp!=NULL?temp->fn_name:"Driver",size);
+            if(!flag_driver)temp = temp->next;
+            else flag_driver=0;
         }
     }
-    printf("\nBYEEEEEEEEEE\n");
+    // printf("\nBYEEEEEEEEEE\n");
     return;
 }
 
@@ -639,6 +709,8 @@ int main(int argc, char *argv[])
         noOfASTNodes = 0;
         noOfParseTreeNodes = 0;
         s_top = NULL;
+        programHasLexicalError = 0;
+        programHasParsingError=0;
 
         switch (option)
         {
@@ -740,15 +812,16 @@ int main(int argc, char *argv[])
         {
             runParser();
             createAST(root);
-            fn_table = initFST(0);
-            fn_table_pass1 = initFST(0);
+            fn_table = initFST(1);
+            fn_table_pass1 = initFST(1);
             if(root==NULL) printf("ROOT IS NULL\n");
             else{
-                printf("root's addr is:%s\n",root->addr->value);
+                // printf("root's addr is:%s\n",root->addr->value);
                 fillDef(root->addr); //pass PROGRAM node
-                struct id_symbol_table* initial_table = initST(0);
-                semanticAnalysis(root,initial_table,0,0);
-                printSymbolTable(fn_table,0);
+                struct id_symbol_table* initial_table = initST(1);
+                semanticAnalysis(root,initial_table,1,0);
+                printSymbolTable(fn_table,0,initial_table);
+                
             }
             free(fn_table);
             free(fn_table_pass1);
@@ -758,15 +831,15 @@ int main(int argc, char *argv[])
         {
             runParser();
             createAST(root);
-            fn_table = initFST(0);
-            fn_table_pass1 = initFST(0);
+            fn_table = initFST(1);
+            fn_table_pass1 = initFST(1);
             if(root==NULL) printf("ROOT IS NULL\n");
             else{
-                printf("root's addr is:%s\n",root->addr->value);
+                // printf("root's addr is:%s\n",root->addr->value);
                 fillDef(root->addr); //pass PROGRAM node
-                struct id_symbol_table* initial_table = initST(0);
-                semanticAnalysis(root,initial_table,0,0);
-                printSymbolTable(fn_table,2);
+                struct id_symbol_table* initial_table = initST(1);
+                semanticAnalysis(root,initial_table,1,0);
+                printSymbolTable(fn_table,2,initial_table);
             }
             free(fn_table);
             free(fn_table_pass1);
@@ -776,15 +849,15 @@ int main(int argc, char *argv[])
         {
             runParser();
             createAST(root);
-            fn_table = initFST(0);
-            fn_table_pass1 = initFST(0);
+            fn_table = initFST(1);
+            fn_table_pass1 = initFST(1);
             if(root==NULL) printf("ROOT IS NULL\n");
             else{
-                printf("root's addr is:%s\n",root->addr->value);
+                // printf("root's addr is:%s\n",root->addr->value);
                 fillDef(root->addr); //pass PROGRAM node
-                struct id_symbol_table* initial_table = initST(0);
-                semanticAnalysis(root,initial_table,0,0);
-                printSymbolTable(fn_table,1);
+                struct id_symbol_table* initial_table = initST(1);
+                semanticAnalysis(root,initial_table,1,0);
+                printSymbolTable(fn_table,1,initial_table);
             }
             free(fn_table);
             free(fn_table_pass1);
@@ -797,21 +870,125 @@ int main(int argc, char *argv[])
             start_time = clock();
             runParser();
             /// ********* ADDDD CHECK HERE TO SEE IF THERE IS NO PARSING?LEXICAL ERROR THEN ONLY CALL SEMANTIC ANALYSIS *************************
-            createAST(root);
-            fn_table = initFST(0);
-            fn_table_pass1 = initFST(0);
-            if(root==NULL) printf("ROOT IS NULL\n");
-            else{
-                printf("root's addr is:%s\n",root->addr->value);
-                fillDef(root->addr); //pass PROGRAM node
-                struct id_symbol_table* initial_table = initST(0);
-                semanticAnalysis(root,initial_table,0,0);
+            if(!programHasLexicalError && !programHasParsingError){
+                createAST(root);
+                fn_table = initFST(1);
+                fn_table_pass1 = initFST(1);
+                if(root==NULL) printf("ROOT IS NULL\n");
+                else{
+                    // printf("root's addr is:%s\n",root->addr->value);
+                    fillDef(root->addr); //pass PROGRAM node
+                    struct id_symbol_table* initial_table = initST(1);
+                    semanticAnalysis(root,initial_table,1,0);
+                }
             }
             end_time = clock();
             total_CPU_time = (double)(end_time - start_time);
             total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
             // Print both total_CPU_time and total_CPU_time_in_seconds
-            printf("Total CPU Time is: %f, totoal cpu time in seconds is %f \n", total_CPU_time + t1, total_CPU_time_in_seconds + t1_in_seconds);
+            printf("\n\nTotal CPU Time is: %f, totoal cpu time in seconds is %f \n", total_CPU_time + t1, total_CPU_time_in_seconds + t1_in_seconds);
+            free(fn_table);
+            free(fn_table_pass1);
+        }
+        break;
+        case 9:
+        {
+            runParser();
+            createAST(root);
+            printAST(root, stdout,0);
+            fn_table = initFST(1);
+            fn_table_pass1 = initFST(1);
+            if(root==NULL) printf("ROOT IS NULL\n");
+            else{
+                printf("root's addr is:%s\n",root->addr->value);
+                fillDef(root->addr); //pass PROGRAM node
+                struct id_symbol_table* initial_table = initST(1);
+                global_max_offset = 0;
+                semanticAnalysis(root,initial_table,1,0);
+                printf("\nGlobal max offset is %d\n",global_max_offset);
+                root->addr->parent = NULL;
+                count = 0;
+                variable_count =0;
+                temporaries_st=initST(0);
+                // printf("\nBefore code generate\n");
+                IRcodegenerate(root);
+                // printf("\nAfter code generate\n");
+                //printf("Label:%s\n",quadTable[1].label);
+                for(int i=0;i<count;i++){
+                    printf("%d)",i+1);
+                    //for label
+                    if(quadTable[i].label!=NULL)
+                        printf("Label is:%s ",quadTable[i].label);
+
+                    //for goToLabel
+                    if(quadTable[i].goTolabel!=NULL)
+                        printf("GoTo is:%s ",quadTable[i].goTolabel);
+
+                    //for Operator
+                    if(strcmp(quadTable[i].op,""))
+                        printf("Operator is:%s ",quadTable[i].op);
+                    
+                    //for arg1
+                    if(quadTable[i].arg1.entry == 0 && quadTable[i].arg1.arg.arg_var!=NULL)
+                        printf("Arg1 is:%s ",quadTable[i].arg1.arg.arg_var->id_lexeme);
+                    else if(quadTable[i].arg1.entry == 1)
+                        printf("Arg1 is:%d ",quadTable[i].arg1.arg.arg_num);
+                    else if(quadTable[i].arg1.entry == 2)
+                        printf("Arg1 is:%f ",quadTable[i].arg1.arg.arg_rnum);
+                    else if(quadTable[i].arg1.arg.arg_bool!=NULL)
+                        printf("Arg1 is:%s ",quadTable[i].arg1.arg.arg_bool);
+
+                    //for index1
+                    if(quadTable[i].index1.entry == 0 && quadTable[i].index1.arg.arg_var!=NULL)
+                        printf("Index1 is:%s ",quadTable[i].index1.arg.arg_var->id_lexeme);
+                    else if(quadTable[i].index1.entry == 1)
+                        printf("Index1 is:%d ",quadTable[i].index1.arg.arg_num);
+                    else if(quadTable[i].index1.entry == 2)
+                        printf("Index1 is:%f ",quadTable[i].index1.arg.arg_rnum);
+                    else if(quadTable[i].index1.arg.arg_bool!=NULL)
+                        printf("Index1 is:%s ",quadTable[i].index1.arg.arg_bool);
+
+                    //for index2
+                    if(quadTable[i].index2.entry == 0 && quadTable[i].index2.arg.arg_var!=NULL)
+                        printf("Index2 is:%s ",quadTable[i].index2.arg.arg_var->id_lexeme);
+                    else if(quadTable[i].index2.entry == 1)
+                        printf("Index2 is:%d ",quadTable[i].index2.arg.arg_num);
+                    else if(quadTable[i].index2.entry == 2)
+                        printf("Index2 is:%f ",quadTable[i].index2.arg.arg_rnum);
+                    else if(quadTable[i].index2.arg.arg_bool!=NULL)
+                        printf("Index2 is:%s ",quadTable[i].index2.arg.arg_bool);
+
+                    //for arg2
+                    if(quadTable[i].arg2.entry == 0 && quadTable[i].arg2.arg.arg_var!=NULL)
+                        printf("Arg2 is:%s ",quadTable[i].arg2.arg.arg_var->id_lexeme);
+                    else if(quadTable[i].arg2.entry == 1)
+                        printf("Arg2 is:%d ",quadTable[i].arg2.arg.arg_num);
+                    else if(quadTable[i].arg2.entry == 2)
+                        printf("Arg2 is:%f ",quadTable[i].arg2.arg.arg_rnum);
+                    else if(quadTable[i].arg2.arg.arg_bool!=NULL)
+                        printf("Arg2 is:%s ",quadTable[i].arg2.arg.arg_bool);
+                    
+                    //for result
+                    if(quadTable[i].result.entry == 0 && quadTable[i].result.arg.arg_var!=NULL)
+                        printf("Result is:%s ",quadTable[i].result.arg.arg_var->id_lexeme);
+                    else if(quadTable[i].result.entry == 1)
+                        printf("Result is:%d ",quadTable[i].result.arg.arg_num);
+                    else if(quadTable[i].result.entry == 2)
+                        printf("Result is:%f ",quadTable[i].result.arg.arg_rnum);
+                    else if(quadTable[i].result.arg.arg_bool!=NULL)
+                        printf("Result is:%s ",quadTable[i].result.arg.arg_bool);
+                    
+                    //for instruction
+                    if(quadTable[i].instruction!=NULL)
+                        printf("Instruction is:%s ",quadTable[i].instruction);
+
+                    printf("\n");
+
+                }
+            }
+            printf("\n BEFROE CODEGEN\n");
+            codegen(argv[2]);
+            // system("nasm -felf64 code.asm && gcc -no-pie code.o && ./a.out");
             free(fn_table);
             free(fn_table_pass1);
         }

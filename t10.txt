@@ -90,6 +90,7 @@ start
 	switch(a)
 	start
 		case 1: a:=a+b;
+		    declare opop:integer;
 			break;
 		case 2: a:=a-b;
 			break;
@@ -99,6 +100,17 @@ start
 			break;
 	end					**ERROR: default statement is missing- the type of switch variable is integer**
 end
+
+
+
+
+
+
+
+
+
+
+
 
 
 

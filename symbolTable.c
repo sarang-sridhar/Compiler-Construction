@@ -1,3 +1,11 @@
+/*
+Group : 11
+ID: 2020A7PS0297P                             NAME: Sarang Sridhar 
+ID: 2020A7PS0995P                             NAME: Kashish Mahajan 
+ID: 2020A7PS0993P                             NAME: Satvik Sinha 
+ID: 2020A7PS0036P                             NAME: Aarya Attrey
+ID: 2020A7PS0017P                             NAME: Urvashi Sharma 
+*/
 #include "treeDef.h"
 #include<string.h>
 #include<stdio.h>
@@ -57,7 +65,7 @@ void insert_in_table(struct id_symbol_table* table,  ST_ENTRY * entry){
 FN_ENTRY* get_func_name(struct fn_symbol_table* table, char* str){
     int hash_value= get_sym_table_hash(str);
     if(table->arr[hash_value]==NULL){
-        printf("1. Error: Function %s not declared \n",str);
+        printf("\n****Error:1. Error: Function %s not declared ****\n",str);
         return NULL;
     }
     else{
@@ -68,12 +76,12 @@ FN_ENTRY* get_func_name(struct fn_symbol_table* table, char* str){
             }
             temp = temp->next;
         }
-        printf("2. Error: Function %s not declared \n",str);
+        printf("\n****Error:2. Error: Function %s not declared ****\n",str);
         return NULL;
     }
 }
 
-ST_ENTRY* get_lexeme(struct id_symbol_table* table, char* str){
+ST_ENTRY* get_lexeme(struct id_symbol_table* table, char* str, int line_no){
     int hash_value= get_sym_table_hash(str);
     struct id_symbol_table* temp_table = table;
     while(temp_table!=NULL){
@@ -89,7 +97,7 @@ ST_ENTRY* get_lexeme(struct id_symbol_table* table, char* str){
         temp_table = temp_table->parent_table;
         
     }
-    printf("\nError: Variable %s not declared \n",str);
+    printf("\n****Error: Variable %s not declared,line no : %d **** \n",str,line_no);
     return NULL;
 }
 
@@ -123,7 +131,7 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
                         }
                     }
                     if(redeclare_flag==0){
-                        printf("\n********************reached********************\n");
+                        // printf("\n********************reached********************\n");
                         printf("\n*****Error: Redeclaration of variable %s, line no : %d *****\n",node->tk_data.lexeme,node->line_no);
                         return NULL;
                     }
@@ -144,7 +152,7 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
                         temp->type = t1;
                         table->arr[hash_value] = temp;
                         node->symbol_table_entry = temp;
-                        printf("\nEntry done for %s, line no: %d \n",node->tk_data.lexeme,node->line_no);
+                        // printf("\nEntry done for %s, line no: %d \n",node->tk_data.lexeme,node->line_no);
                         return temp;
                     }
                     else{
@@ -163,12 +171,13 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
         temp->next = NULL;
         temp->type = t1;
         temp->last_assigned_nesting=-1;
+        temp->isList=0;
 
 
         insert_in_table(table,temp);
         node->symbol_table_entry=temp;
-        printf("Node's symbol table entry:%s\n",node->symbol_table_entry->id_lexeme);
-        printf("\nEntry done for %s, line no: %d \n",node->tk_data.lexeme,node->line_no);
+        // printf("Node's symbol table entry:%s\n",node->symbol_table_entry->id_lexeme);
+        // printf("\nEntry done for %s, line no: %d \n",node->tk_data.lexeme,node->line_no);
         return temp;
 }
 
@@ -190,7 +199,7 @@ FN_ENTRY* create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct tr
                 if(!strcmp(temp->fn_name,node->tk_data.lexeme)){
                     if(temp->ip_head!=NULL){
                         if(!is_first_pass)
-                            printf("Error: Redeclaration of function / Overloading of function %s, line no  %d \n",node->tk_data.lexeme,node->line_no);
+                            printf("\n****Error: Redeclaration of function / Overloading of function %s, line no  %d**** \n",node->tk_data.lexeme,node->line_no);
                         return NULL;
                     }
                     else{
@@ -225,6 +234,8 @@ struct id_symbol_table* initST(int nesting_num){
     t->left_sibling=NULL;
     t->parent_function = NULL;
     t->nesting_value = nesting_num;
+    t->scope_start=0;
+    t->scope_end=0;
     for(int i=0;i<TABLE_SIZE;i++){
         t->arr[i]=NULL;
     }

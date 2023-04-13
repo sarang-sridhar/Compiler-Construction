@@ -37,7 +37,8 @@ start
 			 break;
 		case true: m:=m-n;			**ERROR: Case value is incorrect as condition variable type is integer**
 			 break;
-		default: m:=n*2;	       
+		default: 
+		    m:=n*2;	       
 			 break;			 	
 	end
 
@@ -97,7 +98,7 @@ start
 	declare v1, v2:real;	
 	p[10]:= a*b-20*h;                          **Not an error: array index within bounds**
 	declare b7: array[35..50] of real;			 
-	while(k AND x<=m[11] OR false)
+	while(m[5] AND x<=m[11] OR false)
 	start
 		declare p, u:integer;
 		declare b: array[2..20] of integer;
@@ -286,5 +287,47 @@ start
 			break;
 	end					**ERROR: default statement is missing- the type of switch variable is integer**
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

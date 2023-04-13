@@ -40,6 +40,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
             if(temp->is_for == 1)
                 datatype = "INTEGER";
             else if(temp->is_array==1){
+                programHasSemanticError = 1;
                 printf("\n****Error:Array operand not allowed, line no : %d, from here****\n",node->line_no);
                 return -1;
             }
@@ -51,6 +52,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
             // id should not be of array type
             if (strlen(datatype) == 0)
             {
+                programHasSemanticError = 1;
                 printf("\n Expression cannot contain array type variable. ");
                 return -1;
             }
@@ -118,13 +120,14 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         if (!strcasecmp(node->children->astnextSibling->value, "NUM"))
         {
             int arr_index = node->children->astnextSibling->tk_data.val;
-            if (arr_index >= lr && arr_index < hr)
+            if (arr_index >= lr && arr_index <= hr)
             {
                 // printf("\n Array index: %d falls in range, ans = %d ", node->children->astnextSibling->tk_data.val,ans);
 
             }
             else
             {
+                programHasSemanticError = 1;
                 printf("\n****Error:Array index: %d not in range, line no: %d****", node->children->astnextSibling->tk_data.val,node->children->line_no);
                 return -1;
             }
@@ -135,6 +138,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
 
         if (array_expr_type != 0)
         {
+            programHasSemanticError = 1;
             printf("\n Array index is not integer, at line no:");
             return -1;
         }
@@ -170,6 +174,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
             
             // printf("\n Incompatible addition/subtraction %s leftOp:%d rightOp:%d \n",node->value,leftOpType,rightOpType);
             printf("\n Incompatible addition/Subtraction");
+            programHasSemanticError = 1;
             return -1;
         }
     }
@@ -182,6 +187,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         }
         else
         {
+            programHasSemanticError=1;
             printf("\n Incompatible Division");
             return -1;
         }
@@ -200,6 +206,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         }
         else
         {
+            programHasSemanticError=1;
             printf("\n Incompatible Multiplication");
             return -1;
         }
@@ -212,6 +219,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         }
         else
         {
+            programHasSemanticError=1;
             printf("\n Incompatible AND/OR ");
             return -1;
         }
@@ -225,6 +233,7 @@ int get_type(struct treeNode *node, struct id_symbol_table *table) // to get typ
         }
         else
         {
+            programHasSemanticError=1;
             printf("\n Incompatible relational op \n");
             return -1;
         }
@@ -271,12 +280,14 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
                     }
                 }
                 else{
+                    programHasSemanticError=1;
                     printf("\n ***Error: Assignment statement type mismatch(array) line no : %d****\n ",root->children->line_no);
                     return -1;
                 }
             }
 
             if(lentry->is_array + rentry->is_array > 0){
+                programHasSemanticError=1;
                 printf("\n ****Error:Assignment statement type mismatch(array - id) line no : %d**** ",root->children->line_no);
                 return -1;
             }
@@ -292,6 +303,7 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
         if(temp->is_for == 1)
             datatype = "INTEGER";
         else if(temp->is_array == 1){
+            programHasSemanticError=1;
             printf("\n****Error:Array operand not allowed, line no : %d**** \n",lchild->line_no);
             return -1;
         }
@@ -323,6 +335,7 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
         }
         else
         {
+            programHasSemanticError=1;
             printf("\n****Error: Assignment statement type mis-match, line no : %d**** \n",root->children->line_no);
             return -1;
         }
@@ -361,6 +374,7 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
             }
             else
             {
+                programHasSemanticError=1;
                 printf("\n****Error: Array index: %d not in range, line no: %d**** \n", root->children->children->astnextSibling->tk_data.val,lchild->children->line_no);
                 return -1;
             }
@@ -370,6 +384,7 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
 
         if (array_expr_type != 0)
         {
+            programHasSemanticError=1;
             printf("\n Array index is not integer \n");
             return -1;
         }
@@ -384,6 +399,7 @@ int check_assignment(struct treeNode *root, struct id_symbol_table *table) //-1 
         {
             // printf("\n****Error: Assignment statement type mis-match, lval type = %d, rval type = %d,line no %d ****", lval, rval,root->children->children->line_no);
             printf("\n****Error: Assignment statement type mis-match, line no %d ****",root->children->children->line_no);
+            programHasSemanticError=1;
             return -1;
         }
     }
@@ -393,6 +409,8 @@ int check_while(struct treeNode *root, struct id_symbol_table *table)
 {
     // Rule is : iterativeStmt.addr = make_new_node("WHILE",arithmeticOrBooleanExpr.addr,statements.syn);
     int type = get_type(root->children, table);
+    struct treeNode* temp = root->children;
+
     if (type == 2)
     {
         // printf("\n While condition is boolean \n");
@@ -400,6 +418,7 @@ int check_while(struct treeNode *root, struct id_symbol_table *table)
     }
     else
     {
+        programHasSemanticError=1;
         printf("\n While condition is not boolean \n");
         return -1;
     }
@@ -412,6 +431,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
     FN_ENTRY *func = get_func_name(fn_table, root->children->tk_data.lexeme);
     if (func == NULL)
     {
+        programHasSemanticError=1;
         printf("\n****Error:Function not defined/declared,line no : %d****\n",root->children->line_no);
         return -1;
     }
@@ -420,6 +440,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
     if(table->parent_function!=NULL){
         FN_ENTRY* fn = table->parent_function;
         if(!strcasecmp(func->fn_name,fn->fn_name)){
+            programHasSemanticError=1;
             printf("\n****Error: Recursive function call line no : %d****\n ",root->children->line_no);
             return -1;
         }
@@ -430,6 +451,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
     //printf("Function is:%s and is_declared:%d \n",func->fn_name,func->is_declared);
     if(func->is_declared == 1 && func->ip_head!=NULL && func->is_valid!=1){
         func->is_valid = 0;
+        programHasSemanticError=1;
         printf("\n****Error:Redundant Defintion of function %s, line no:%d****\n",func->fn_name,root->children->line_no);
         return -1;
     }
@@ -461,6 +483,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         if (called_op_list == NULL)
         { // if one is null but the other list is not null
             comparison_flag_type_checking = 1;
+            programHasSemanticError=1;
             printf("No of parameters is different in function call, line no: %d \n", root->children->line_no);
             return -1;
         }
@@ -472,6 +495,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         }
         // if(op_entry==NULL)printf("\n OP ENTRY IS NULL \n");
         if(op_entry->is_for==1){
+            programHasSemanticError=1;
             printf("\n****Error: For loop variable cannot be an output parameter, line no: %d ****\n", root->children->line_no);
             return -1;
             if(strcasecmp(defined_op_list->parameter_type.id_type.id_dt,"INTEGER")){
@@ -482,12 +506,14 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         }
         else if(op_entry->is_array == 1){
             comparison_flag_type_checking = 1;
+            programHasSemanticError=1;
             printf("\n**** Error: Array cannot be an output parameter, line no: %d ****\n", root->children->line_no);
             return -1;
         }
         else if (strcasecmp(defined_op_list->parameter_type.id_type.id_dt, op_entry->type.id_type.id_dt)) // if comparison results in non 0 meaning both arent the same hence error
         {
             comparison_flag_type_checking = 1;
+            programHasSemanticError=1;
             printf("\n****Error: type doesnt match in function call, line no: %d ****\n", root->children->line_no);
             return -1;
         }
@@ -498,12 +524,14 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         { // if one is null but the other is not null
             comparison_flag_type_checking = 1;
             printf("No of parameters is different in function call, line no: %d \n", root->children->line_no);
+            programHasSemanticError=1;
             return -1;
         }
     }
 
     if((defined_op_list==NULL && called_op_list!=NULL) || (defined_op_list!=NULL && called_op_list==NULL)){
         comparison_flag_type_checking = 1;
+        programHasSemanticError=1;
         printf("No of parameters is different in function call, line no: %d \n", root->children->line_no);
         return -1;
     }
@@ -518,6 +546,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         if (called_ip_list == NULL)
         { // if one is null but the other list is not null
             comparison_flag_type_checking = 1;
+            programHasSemanticError=1;
             printf("No of parameters is different in function call, line no: %d \n", root->children->line_no);
             return -1;
         }
@@ -532,7 +561,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         int flag_for_type = 1; // 1- to access id struct, 2 to access array struct
         if (!strcasecmp(actual_child->value, "ARRAY_ACCESS"))
         {
-            printf("\n line 504 \n");
+            // printf("\n line 504 \n");
             flag_for_type = 2;
         }
         if (flag_for_type == 1) // if comparison results in non 0 meaning both arent the same hence error
@@ -590,6 +619,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
             // printf("\n line 545 \n");
             if(comparison_flag_type_checking){
                 // printf("\nbefore error\n");
+                programHasSemanticError=1;
                 printf("\n ****Error:type doesnt match in function call, line no: %d**** \n", root->children->line_no);
                 // printf("\n after error 549\n ");
                 return -1;
@@ -609,6 +639,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
             }
             if(comparison_flag_type_checking){
                 printf("\n ****Error:type doesnt match in function call, line no: %d ****\n", root->children->line_no);
+                programHasSemanticError=1;
                 return -1;
             }
             int lr = ip_entry->type.arr_type.lowRange.start;
@@ -616,13 +647,14 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
             if (!strcasecmp(actual_child->children->astnextSibling->value, "NUM"))
             {
                 int arr_index = actual_child->children->astnextSibling->tk_data.val;
-                if (arr_index >= lr && arr_index < hr)
+                if (arr_index >= lr && arr_index <= hr)
                 {
                     // printf("\n Array index: %d falls in range", actual_child->children->astnextSibling->tk_data.val);
 
                 }
                 else
                 {
+                    programHasSemanticError=1;
                     printf("****Error:\n Array index: %d not in range****,line no : %d \n ", actual_child->children->astnextSibling->tk_data.val,actual_child->children->line_no);
                     return -1;
                 }
@@ -635,6 +667,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
         if (defined_ip_list == NULL && called_ip_list != NULL)
         { // if one is null but the other is not null
             comparison_flag_type_checking = 1;
+            programHasSemanticError=1;
             printf("No of parameters is different in function call, line no: %d \n", root->children->line_no);
             return -1;
         }
@@ -643,6 +676,7 @@ int check_function_call(struct treeNode *root, struct id_symbol_table *table)
 
     if((defined_ip_list!=NULL && called_ip_list==NULL) || (defined_ip_list==NULL && called_ip_list!=NULL)){
         comparison_flag_type_checking = 1;
+        programHasSemanticError=1;
         printf("No of parameters is different in function call, line no: %d \n", root->children->line_no);
         return -1;
     }
@@ -674,6 +708,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
     int switch_type;
     if (!strcasecmp(datatype, "REAL"))
     {
+        programHasSemanticError=1;
         printf("\n***Error:Switch case cant have real value,line no:%d****\n",root->children->line_no); 
         return -1;
     }
@@ -699,6 +734,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
                 // }
                 if(switch_type!=0)
                 {
+                    programHasSemanticError=1;
                     printf("\n*** Error:Switch type is not integer, case type is integer %d***\n",root->children->line_no);
                     return -1;
                 }
@@ -711,6 +747,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
                 // }
                 if(switch_type!=2)
                 {
+                    programHasSemanticError=1;
                     printf("\n***Error:Switch type is not boolean, case type is boolean, line no : %d***\n",root->children->line_no);
                     return -1;
                 }
@@ -723,6 +760,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
         {
             if (defaultNode == NULL)
             {
+                programHasSemanticError=1;
                 printf("\n****Error:Switch cases for integer type must have default statement,line no: %d****\n",root->children->line_no);
                 return -1;
             }
@@ -731,6 +769,7 @@ int check_switch_case(struct treeNode *root, struct id_symbol_table *table)
         {
             if (defaultNode != NULL)
             {
+                programHasSemanticError=1;
                 printf("\n****Error:Switch cases for boolean type must not have default statement, line no : %d***\n",root->children->line_no);
                 return -1;
             }
@@ -751,6 +790,7 @@ void check_for_variable(struct treeNode* root,struct id_symbol_table* table){
             while(temp!=NULL){
                 if(!strcmp(temp->id_lexeme,str)){
                     if(temp->is_for==1){
+                        programHasSemanticError=1;
                         printf("\n****Error:FOR's variable cannot be assigned a value, line no : %d**** \n",root->children->line_no);
                     }
                 }
@@ -839,6 +879,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                         }
                         // id-symbol table
                         child_table = initST(nesting_num);
+                        child_table->scope_start=child1->line_no;
                         child_table->parent_function = fn_entry;
                         if (fn_entry->child_table == NULL)
                             fn_entry->child_table = child_table;
@@ -879,6 +920,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                     // id-symbol table
                     child_table = initST(nesting_num);
                     child_table->parent_function = fn_entry;
+                    child_table->scope_start=child1->line_no;
                     if (fn_entry->child_table == NULL)
                         fn_entry->child_table = child_table;
                     else
@@ -910,6 +952,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             ST_ENTRY* curr = child_table->arr[hash_value];
             while(curr){
                 if(!strcmp(curr->id_lexeme,name)){
+                    programHasSemanticError=1;
                     printf("\n Input list cannot have same variable appearing more than once %s \n",name);
                     return;
                 }
@@ -930,8 +973,10 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 // printf("INPUT LIST : Offset for:%s in ip list is:%d \n",name,offset);
                 int lr = temp->parameter_type.arr_type.lowRange.start;
                 int hr = temp->parameter_type.arr_type.highRange.end;
-                if(lr >hr)
+                if(lr >hr){
                     printf("Error: Low Range should be smaller than high range\n");
+                    programHasSemanticError=1;
+                }
                 if(!strcasecmp(temp->parameter_type.arr_type.arr_dt,"INTEGER")){
                     block->width=2*(hr-lr+1);
                     offset+=2*(hr-lr+1);
@@ -991,6 +1036,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 while(curr){
                     if(!strcmp(curr->id_lexeme,name)){
                         printf("\n Output list cannot have same variable appearing more than once %s \n",name);
+                        programHasSemanticError=1;
                         return;
                     }
                     curr = curr->next;
@@ -1057,6 +1103,9 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
 
         while(stmts!=NULL){
             semanticAnalysis(stmts,child_table,nesting_num,offset);
+            if(stmts->next==NULL){//if end is switch/for/while show's end line no as the start line no of swicth/for/while
+            
+            }
             stmts = stmts->next;
         }
 
@@ -1084,6 +1133,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             }
             //
             if(t!=NULL && t->is_used!=1){
+                programHasSemanticError=1;
                 printf("\n****Error: Output param:%s not assigned value inside the function %s****\n",op_param,child_table->parent_function->fn_name);
             }
             temp3 = temp3->next;
@@ -1110,7 +1160,50 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                     leftChild = leftChild->next;
                 }
             }
+
+            /// 
+            struct treeNode* driver;
+            if(root->children!=NULL){
+                if(!strcasecmp(root->children->value,"ID")){
+                    struct treeNode* t1 = root->children;
+                    if(t1->astnextSibling!=NULL && !strcmp(t1->astnextSibling->value,"MODULE_DEF")){
+                        driver = t1->astnextSibling->astnextSibling;
+
+                    }
+                    else driver = t1->astnextSibling;
+                }
+                else if(!strcasecmp(root->children->value,"MODULE_DEF")){
+                    driver = root->children->astnextSibling;
+                }
+                else driver = root->children;
+
+                
+                // struct treeNode* tempdriver = driver;
+                // while(tempdriver!=NULL){
+                //     if(tempdriver->next==NULL){
+                //         struct treeNode* temp5 = tempdriver;
+                //         while(temp5!=NULL){
+                //             if(temp5->isTerminal==1){
+                //                 id_table->scope_end = temp5->line_no;
+                //                 break;
+                //             }
+                //             temp5 = temp5->children;
+                //         }
+                //     }
+                //     tempdriver = tempdriver->next;
+                // }
+                
+
+                while(driver!=NULL){
+                      if(driver->isTerminal==1){
+                            id_table->scope_start = driver->line_no;
+                            break;
+                      }
+                    driver=driver->children;
+                }   
+            }
         }
+    
         
         else if (!strcasecmp(root->value, "FOR"))
         {
@@ -1153,6 +1246,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             }
 
             struct id_symbol_table *child_table = initST(nesting_num + 1);
+            child_table->scope_start=root->children->line_no;
             ST_ENTRY* temp = create_entry_and_insert(child_table, root->children, type);
             if(temp!=NULL){
                 temp->is_array=0;
@@ -1203,6 +1297,16 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
 
             while(stmts!=NULL){
                 semanticAnalysis(stmts,child_table,nesting_num+1,offset);
+                if(stmts->next==NULL){
+                    struct treeNode* temp5 = stmts;
+                    while(temp5!=NULL){
+                        if(temp5->isTerminal){
+                            child_table->scope_end = temp5->line_no;
+                            break;
+                        }
+                        temp5=temp5->children;
+                    }
+                }
                 stmts = stmts->next;
             }
 
@@ -1300,8 +1404,10 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                         if(t.arr_type.isStatic==1){
                             int lr =t.arr_type.lowRange.start;
                             int hr =t.arr_type.highRange.end;
-                            if(lr > hr)
+                            if(lr > hr){
                                 printf("Error: Low Range should be smaller than high range\n");
+                                programHasSemanticError=1;
+                            }
                             char* datatype = t.arr_type.arr_dt;
                             if(!strcasecmp(datatype,"INTEGER")){
                                 temp->offset=offset;
@@ -1359,6 +1465,15 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             //     return;
             // }
             struct id_symbol_table *child_table = initST(nesting_num + 1);
+            struct treeNode * temp = root->children;
+            while(temp!=NULL){
+            if(temp->isTerminal==1){
+                child_table->scope_start = temp->line_no;
+                // printf("\n while scope starts at:%s in here \n",temp->value);
+                break;
+            }
+            temp = temp->children;
+            }
             child_table->parent_table = id_table;
             if (id_table->child_table == NULL)
             {
@@ -1377,14 +1492,26 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             //id_table = child_table;
             while(stmts!=NULL){
                 semanticAnalysis(stmts,child_table,nesting_num+1,offset);
+                if(stmts->next==NULL){
+                    struct treeNode* temp5= stmts;
+                    while(temp5!=NULL){
+                        if(temp5->isTerminal==1){
+                            child_table->scope_end = temp5->line_no;
+                            break;
+                        }
+                        temp5 = temp5->children;
+                    }
+                }
                 stmts=stmts->next;
             }
 
             //traverse expr and check
             struct treeNode* while_expr = root->children;
             int is_while_assigned = check_while_assignment(while_expr,id_table,nesting_num+1);
-            if(is_while_assigned == 0)
+            if(is_while_assigned == 0){
                 printf("\n****Error: No variable in expression of while was assigned a value****\n");
+                programHasSemanticError = 1;
+            }
 
             root = root->next;
             if (root != NULL)
@@ -1415,7 +1542,7 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
             {
                 // value->pair = stmts
                 struct id_symbol_table *child_table = initST(nesting_num + 1);
-                child_table->scope_start=root->children->line_no;
+                child_table->scope_start=caseList->line_no;
                 child_table->parent_table = id_table;
                 if (id_table->child_table == NULL)
                 {
@@ -1440,7 +1567,17 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 {
                     semanticAnalysis(stmts, child_table, nesting_num+1, offset);
                     //printf("\nREACHED HERE\n");
-                    
+                    // if(stmts->next==NULL){
+                    //      struct treeNode* temp5 = stmts;
+                    //      while(temp5!=NULL){
+                    //         if(temp5->isTerminal==1){
+                    //             child_table->scope_end = temp5->line_no+1;
+                    //             break;
+                    //         }
+                    //         temp5=temp5->children;
+
+                    //      }
+                    // }
                     stmts = stmts->next;
                 }
                 // id_table = temp;
@@ -1471,10 +1608,32 @@ void semanticAnalysis(struct treeNode *root, struct id_symbol_table *id_table, i
                 child_table->left_sibling = temp;
                 temp->right_sibling = child_table;
             }
+            int default_line_no_flag = 0;
             while (stmts != NULL)
             {
+                if(default_line_no_flag == 0){
+                     struct treeNode* temp5 = stmts;
+                        while(temp5!=NULL){
+                            if(temp5->isTerminal==1){
+                                child_table->scope_start = temp5->line_no;
+                                default_line_no_flag = 1;
+                                break;
+                            }
+                            temp5=temp5->children;
+                        }
+                }
                 // printf("Default is not NULL \n");
                 semanticAnalysis(stmts, child_table, nesting_num+1, offset);
+                if(stmts->next==NULL){
+                    struct treeNode* temp5 = stmts;
+                        while(temp5!=NULL){
+                            if(temp5->isTerminal==1){
+                                child_table->scope_end = temp5->line_no;
+                                break;
+                            }
+                            temp5=temp5->children;
+                        }
+                }
                 stmts = stmts->next;
             }
             //id_table = child_table;

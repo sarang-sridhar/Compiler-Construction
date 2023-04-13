@@ -65,6 +65,7 @@ void insert_in_table(struct id_symbol_table* table,  ST_ENTRY * entry){
 FN_ENTRY* get_func_name(struct fn_symbol_table* table, char* str){
     int hash_value= get_sym_table_hash(str);
     if(table->arr[hash_value]==NULL){
+        programHasSemanticError=1;
         printf("\n****Error:1. Error: Function %s not declared ****\n",str);
         return NULL;
     }
@@ -76,6 +77,7 @@ FN_ENTRY* get_func_name(struct fn_symbol_table* table, char* str){
             }
             temp = temp->next;
         }
+        programHasSemanticError=1;
         printf("\n****Error:2. Error: Function %s not declared ****\n",str);
         return NULL;
     }
@@ -97,6 +99,7 @@ ST_ENTRY* get_lexeme(struct id_symbol_table* table, char* str, int line_no){
         temp_table = temp_table->parent_table;
         
     }
+    programHasSemanticError=1;
     printf("\n****Error: Variable %s not declared,line no : %d **** \n",str,line_no);
     return NULL;
 }
@@ -132,6 +135,7 @@ ST_ENTRY* create_entry_and_insert(struct id_symbol_table* table,struct treeNode*
                     }
                     if(redeclare_flag==0){
                         // printf("\n********************reached********************\n");
+                        programHasSemanticError=1;
                         printf("\n*****Error: Redeclaration of variable %s, line no : %d *****\n",node->tk_data.lexeme,node->line_no);
                         return NULL;
                     }
@@ -198,8 +202,10 @@ FN_ENTRY* create_entry_and_insert_in_FST(struct fn_symbol_table* table,struct tr
             while(temp){
                 if(!strcmp(temp->fn_name,node->tk_data.lexeme)){
                     if(temp->ip_head!=NULL){
-                        if(!is_first_pass)
+                        if(!is_first_pass){
                             printf("\n****Error: Redeclaration of function / Overloading of function %s, line no  %d**** \n",node->tk_data.lexeme,node->line_no);
+                            programHasSemanticError=1;
+                        }
                         return NULL;
                     }
                     else{
@@ -259,6 +265,7 @@ LISTNODE* makeListNode(struct treeNode* head,int isOpList){
         //ALERT
         if(isOpList == 1){
             printf("Error:Array cannot be function Output Parameter\n");
+            programHasSemanticError=1;
         }
         temp->parameter_type.arr_type.arr_dt = head->pair->children->astnextSibling->value;
         temp->is_array=1;

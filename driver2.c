@@ -8,6 +8,7 @@ ID: 2020A7PS0017P                             NAME: Urvashi Sharma
 */
 
 // #include "lexer.c"
+int programHasSemanticError = 0;
 #include "parser.c"
 #include "ast.c"
 #include "semanticAnalysis.c"
@@ -625,8 +626,18 @@ void printSymbolTable(struct fn_symbol_table *table,int flag,struct id_symbol_ta
     return;
 }
 
+void initQuadTable(){
+    for(int i=0;i<QUAD_SIZE;i++){
+        quadTable[i].label = NULL;
+        quadTable[i].goTolabel = NULL;
+        quadTable[i].instruction = NULL;
+        quadTable[i].arg_fn_name = NULL;
+    }
+}
+
 int main(int argc, char *argv[])
 {
+
 
     if (argc != 3)
     {
@@ -636,7 +647,7 @@ int main(int argc, char *argv[])
 
     preProcessing(argv[1]);
 
-    printf("\n\nLEVEL 4: Symbol table/ AST/ Semantic Rules/Type checking modules work fully/handled static and dynamic arrays.\n\n");
+    printf("\n\nLEVEL 4: Symbol table/ AST/ Semantic Rules/Type checking modules work fully/handled static and dynamic arrays/Codegen done partially.\n\n");
     int option;
 
     buffer_size = 512;
@@ -711,6 +722,7 @@ int main(int argc, char *argv[])
         s_top = NULL;
         programHasLexicalError = 0;
         programHasParsingError=0;
+        programHasSemanticError=0;
 
         switch (option)
         {
@@ -881,6 +893,8 @@ int main(int argc, char *argv[])
                     struct id_symbol_table* initial_table = initST(1);
                     semanticAnalysis(root,initial_table,1,0);
                 }
+                if(!programHasSemanticError)printf("\n Code Compiled Succesfully \n");
+                else printf("\n Program has Semantic Errors \n");
             }
             end_time = clock();
             total_CPU_time = (double)(end_time - start_time);
@@ -905,14 +919,20 @@ int main(int argc, char *argv[])
                 struct id_symbol_table* initial_table = initST(1);
                 global_max_offset = 0;
                 semanticAnalysis(root,initial_table,1,0);
+                if(programHasSemanticError){
+                    printf("\n ******Program has Semantic Errors Pls Rectify***** \n");
+                    printf("\n****Codegen not done due to errors****\n");
+                    break;
+                }
                 printf("\nGlobal max offset is %d\n",global_max_offset);
                 root->addr->parent = NULL;
                 count = 0;
                 variable_count =0;
                 temporaries_st=initST(0);
                 // printf("\nBefore code generate\n");
+                initQuadTable();
                 IRcodegenerate(root);
-                // printf("\nAfter code generate\n");
+                printf("\nAfter code generate\n");
                 //printf("Label:%s\n",quadTable[1].label);
                 for(int i=0;i<count;i++){
                     printf("%d)",i+1);

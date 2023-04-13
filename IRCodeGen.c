@@ -72,6 +72,7 @@ void operator_appears(struct treeNode *root)
     // if (root->visited)
     //     return;
     // root->visited = 1;
+    printf("ISME GHUS RAHA HAI\n");
     struct treeNode *leftChild = root->children;
     if (leftChild == NULL)
         return;
@@ -116,8 +117,9 @@ void operator_appears(struct treeNode *root)
         }
         // else
         // {
+        //     printf("THIS\n");
         //     // ARRAY CASE
-        //     t = leftChild->children->symbol_table_entry->type;
+        //     t.id_type.id_dt = leftChild->children->symbol_table_entry->type.arr_type.arr_dt;
         //     quadTable[count].arg1.arg.arg_var = leftChild->children->symbol_table_entry;
         //     quadTable[count].arg1.entry = 0;
         //     if (leftChild->children->astnextSibling->temp_variable_entry != NULL)
@@ -127,7 +129,7 @@ void operator_appears(struct treeNode *root)
         //     }
         //     else if (!strcmp(leftChild->children->astnextSibling->value, "NUM"))
         //     {
-        //         quadTable[count].index1.arg.arg_num = leftChild->children->astnextSibling->tk_data.val;
+        //         quadTable[count].index1.arg.arg_num = leftChild->children->symbol_table_entry->offset + leftChild->children->astnextSibling->tk_data.val;
         //         quadTable[count].index1.entry = 1;
         //     }
         //     else
@@ -135,6 +137,7 @@ void operator_appears(struct treeNode *root)
         //         quadTable[count].index1.arg.arg_var = leftChild->children->astnextSibling->symbol_table_entry;
         //         quadTable[count].index1.entry = 0;
         //     }
+        //     printf("AFTER THIS\n");
         // }
     }
     else
@@ -147,44 +150,49 @@ void operator_appears(struct treeNode *root)
     // for right-child
     if (rightChild->temp_variable_entry == NULL)
     {
+        printf("RIGHT\n");
         if (!strcmp(rightChild->value, "ID")){
-            //printf("Right child ka symbol table entry is:%s\n",rightChild->symbol_table_entry->id_lexeme);
+            printf("Right child ka symbol table entry is:%s\n",rightChild->symbol_table_entry->id_lexeme);
             quadTable[count].arg2.arg.arg_var = rightChild->symbol_table_entry;
             quadTable[count].arg2.entry = 0;
         }
         else if (!strcmp(rightChild->value, "NUM")){
+            printf("NUM\n");
             quadTable[count].arg2.arg.arg_num = rightChild->tk_data.val;
-            quadTable[count].arg2.entry = 1;}
+            quadTable[count].arg2.entry = 1;
+            printf("After num\n");
+        }
         else if (!strcmp(rightChild->value, "RNUM")) // RNUM case 
-        {   quadTable[count].arg2.arg.arg_num = rightChild->tk_data.realVal;
+        {   printf("RNUM\n");
+            quadTable[count].arg2.arg.arg_num = rightChild->tk_data.realVal;
             quadTable[count].arg2.entry = 2;
         }
         else if (!strcmp(rightChild->value, "BOOLEAN")){
             quadTable[count].arg2.arg.arg_bool = rightChild->tk_data.lexeme;
             quadTable[count].arg2.entry = 3;
-            }
-        else
-        {
-            // ARRAY CASE
-
-            quadTable[count].arg2.arg.arg_var = rightChild->children->symbol_table_entry;
-            quadTable[count].arg2.entry = 0;
-            if (rightChild->children->astnextSibling->temp_variable_entry != NULL)
-            {
-                quadTable[count].index2.arg.arg_var = rightChild->children->astnextSibling->temp_variable_entry;
-                quadTable[count].index2.entry = 0;
-            }
-            else if (!strcmp(rightChild->children->astnextSibling->value, "NUM"))
-            {
-                quadTable[count].index2.arg.arg_num = rightChild->children->astnextSibling->tk_data.val;
-                quadTable[count].index2.entry = 1;
-            }
-            else
-            { // id case
-                quadTable[count].index2.arg.arg_var = rightChild->children->astnextSibling->symbol_table_entry;
-                quadTable[count].index2.entry = 0;
-            }
         }
+        // else
+        // {
+        //     // ARRAY CASE
+        //     printf("THAT\n");
+        //     quadTable[count].arg2.arg.arg_var = rightChild->children->symbol_table_entry;
+        //     quadTable[count].arg2.entry = 0;
+        //     if (rightChild->children->astnextSibling->temp_variable_entry != NULL)
+        //     {
+        //         quadTable[count].index2.arg.arg_var = rightChild->children->astnextSibling->temp_variable_entry;
+        //         quadTable[count].index2.entry = 0;
+        //     }
+        //     else if (!strcmp(rightChild->children->astnextSibling->value, "NUM"))
+        //     {
+        //         quadTable[count].index2.arg.arg_num = rightChild->children->symbol_table_entry->offset + rightChild->children->astnextSibling->tk_data.val;
+        //         quadTable[count].index2.entry = 1;
+        //     }
+        //     else
+        //     { // id case
+        //         quadTable[count].index2.arg.arg_var = rightChild->children->astnextSibling->symbol_table_entry;
+        //         quadTable[count].index2.entry = 0;
+        //     }
+        // }
     }
     else
     {
@@ -195,9 +203,10 @@ void operator_appears(struct treeNode *root)
     // set operator
     strcpy(quadTable[count].op, root->value);
 
-    //printf("Before new temp:%s\n",t.id_type.id_dt);
+    // printf("Before new temp:\n");
+
     ST_ENTRY *tempVarEntry = newTemp(t);
-    //printf("After new temp\n");
+    // printf("After new temp\n");
     quadTable[count].result.arg.arg_var = tempVarEntry;
     quadTable[count].result.entry = 0;
     root->temp_variable_entry = tempVarEntry; // set temp_variable entry of node
@@ -927,22 +936,32 @@ void IRcodegenerate(struct treeNode *root)
             struct treeNode *temporary = id->astnextSibling;
             if (temporary->temp_variable_entry != NULL){
                 quadTable[count].arg1.arg.arg_var = temporary->temp_variable_entry;
-                 quadTable[count].arg1.entry = 0;}
+                 quadTable[count].arg1.entry = 0;
+            }
             else
             {
-                if (!strcmp(temporary->value, "NUM"))
+                if (!strcasecmp(temporary->value, "NUM"))
                 {
                     quadTable[count].arg1.arg.arg_num = temporary->tk_data.val;
                     quadTable[count].arg1.entry = 1;
                 }
-                else if (!strcmp(temporary->value, "RNUM"))
+                else if (!strcasecmp(temporary->value, "RNUM"))
                 {
                     quadTable[count].arg1.arg.arg_rnum = temporary->tk_data.realVal;
                     quadTable[count].arg1.entry = 2;
                 }
-                // introduce Array case later
-                else
+                else if(!strcasecmp(temporary->value,"TRUE"))
                 {
+                    quadTable[count].arg1.arg.arg_bool = "true";
+                    quadTable[count].arg1.entry = 3;
+                }
+                else if(!strcasecmp(temporary->value,"FALSE"))
+                {
+                    quadTable[count].arg1.arg.arg_bool = "false";
+                    quadTable[count].arg1.entry = 3;
+                }
+                // introduce Array case later
+                else{
                     quadTable[count].arg1.arg.arg_var = temporary->symbol_table_entry;
                     quadTable[count].arg1.entry = 0;
                 }
@@ -979,6 +998,17 @@ void IRcodegenerate(struct treeNode *root)
                 {
                     quadTable[count].arg1.arg.arg_rnum = temporary->tk_data.realVal;
                     quadTable[count].arg1.entry = 2;
+                }
+                else if(!strcasecmp(temporary->value,"TRUE"))
+                {
+                    quadTable[count].arg1.arg.arg_bool = "true";
+                    quadTable[count].arg1.entry = 3;
+                }
+                else if(!strcasecmp(temporary->value,"FALSE"))
+                {
+                    
+                    quadTable[count].arg1.arg.arg_bool = "false";
+                    quadTable[count].arg1.entry = 3;
                 }
                 // introduce Array case later
                 else
@@ -1018,90 +1048,90 @@ void IRcodegenerate(struct treeNode *root)
             count++;
         }
         
-        //offset computation for array access
-        else if(!strcmp(root->value,"ARRAY_ACCESS"))
-        {
-            struct treeNode* arr_name = root->children;
-            struct treeNode* index = root->children->astnextSibling;  
-            int base = arr_name->symbol_table_entry->offset;
-            char* type = arr_name->symbol_table_entry->type.arr_type.arr_dt;
-            int low_range = arr_name->symbol_table_entry->type.arr_type.lowRange.start;
+        // //offset computation for array access
+        // else if(!strcmp(root->value,"ARRAY_ACCESS"))
+        // {
+        //     struct treeNode* arr_name = root->children;
+        //     struct treeNode* index = root->children->astnextSibling;  
+        //     int base = arr_name->symbol_table_entry->offset;
+        //     char* type = arr_name->symbol_table_entry->type.arr_type.arr_dt;
+        //     int low_range = arr_name->symbol_table_entry->type.arr_type.lowRange.start;
 
-            //A[i] = A(base) + (i-lowRange)*width
+        //     //A[i] = A(base) + (i-lowRange)*width
 
-            //i-lowRange instruction
-            strcpy(quadTable[count].op,"MINUS");
-            if(index->temp_variable_entry != NULL)
-            {
-                quadTable[count].arg1.arg.arg_var = index->temp_variable_entry;
-                quadTable[count].arg1.entry = 0;
-            }
+        //     //i-lowRange instruction
+        //     strcpy(quadTable[count].op,"MINUS");
+        //     if(index->temp_variable_entry != NULL)
+        //     {
+        //         quadTable[count].arg1.arg.arg_var = index->temp_variable_entry;
+        //         quadTable[count].arg1.entry = 0;
+        //     }
 
-            else
-            {
-                if(!strcmp(index->value,"NUM")){
-                    quadTable[count].arg1.arg.arg_num =  index->tk_data.val;
-                    quadTable[count].arg1.entry = 1;
-                }
+        //     else
+        //     {
+        //         if(!strcmp(index->value,"NUM")){
+        //             quadTable[count].arg1.arg.arg_num =  index->tk_data.val;
+        //             quadTable[count].arg1.entry = 1;
+        //         }
 
-                else if(!strcmp(index->value,"ID")){
-                    quadTable[count].arg1.arg.arg_var =  index->symbol_table_entry;
-                    quadTable[count].arg1.entry = 0;
-                }
-            }
+        //         else if(!strcmp(index->value,"ID")){
+        //             quadTable[count].arg1.arg.arg_var =  index->symbol_table_entry;
+        //             quadTable[count].arg1.entry = 0;
+        //         }
+        //     }
 
-            if(arr_name->symbol_table_entry->type.arr_type.isStatic == 1){
-                quadTable[count].arg2.arg.arg_num = arr_name->symbol_table_entry->type.arr_type.lowRange.start;
-                quadTable[count].arg2.entry = 1;
-            }
-            else{
-                //DIKKAT HAI ISME :( if array is not static,need symbol table entry
-                //quadTable[count].arg2.arg.arg_var = arr_name->symbol_table_entry->type.arr_type.lowRange.low_id;
-            }
-            TYPE t;
-            t.id_type.id_dt = "INTEGER";
-            ST_ENTRY *tempVarEntry2 = newTemp(t);
-            quadTable[count].result.arg.arg_var = tempVarEntry2;
-            quadTable[count].result.entry = 0;
-            count++;
+        //     if(arr_name->symbol_table_entry->type.arr_type.isStatic == 1){
+        //         quadTable[count].arg2.arg.arg_num = arr_name->symbol_table_entry->type.arr_type.lowRange.start;
+        //         quadTable[count].arg2.entry = 1;
+        //     }
+        //     else{
+        //         //DIKKAT HAI ISME :( if array is not static,need symbol table entry
+        //         //quadTable[count].arg2.arg.arg_var = arr_name->symbol_table_entry->type.arr_type.lowRange.low_id;
+        //     }
+        //     TYPE t;
+        //     t.id_type.id_dt = "INTEGER";
+        //     ST_ENTRY *tempVarEntry2 = newTemp(t);
+        //     quadTable[count].result.arg.arg_var = tempVarEntry2;
+        //     quadTable[count].result.entry = 0;
+        //     count++;
 
-            //temp*width instrcution
-            strcpy(quadTable[count].op,"MUL");
-            quadTable[count].arg1.arg.arg_var = tempVarEntry2;
-            quadTable[count].arg1.entry = 0;
+        //     //temp*width instrcution
+        //     strcpy(quadTable[count].op,"MUL");
+        //     quadTable[count].arg1.arg.arg_var = tempVarEntry2;
+        //     quadTable[count].arg1.entry = 0;
             
-            if(!strcasecmp(type,"INTEGER")){
-                quadTable[count].arg2.arg.arg_num = 2;
-                quadTable[count].arg2.entry = 1;
-            }
-            else if(!strcasecmp(type,"REAL")){
-                quadTable[count].arg2.arg.arg_num = 4;
-                quadTable[count].arg2.entry = 1;
-            }
-            else
-            {
-                //boolean
-                quadTable[count].arg2.arg.arg_num = 1;
-                quadTable[count].arg2.entry = 1;
-            }
+        //     if(!strcasecmp(type,"INTEGER")){
+        //         quadTable[count].arg2.arg.arg_num = 2;
+        //         quadTable[count].arg2.entry = 1;
+        //     }
+        //     else if(!strcasecmp(type,"REAL")){
+        //         quadTable[count].arg2.arg.arg_num = 4;
+        //         quadTable[count].arg2.entry = 1;
+        //     }
+        //     else
+        //     {
+        //         //boolean
+        //         quadTable[count].arg2.arg.arg_num = 1;
+        //         quadTable[count].arg2.entry = 1;
+        //     }
 
-            ST_ENTRY *tempVarEntry = newTemp(t);
-            quadTable[count].result.arg.arg_var = tempVarEntry;
-            quadTable[count].result.entry = 0;
-            count++;
+        //     ST_ENTRY *tempVarEntry = newTemp(t);
+        //     quadTable[count].result.arg.arg_var = tempVarEntry;
+        //     quadTable[count].result.entry = 0;
+        //     count++;
 
-            //A(base) + temp
-            strcpy(quadTable[count].op,"PLUS");
-            quadTable[count].arg1.arg.arg_num = base;
-            quadTable[count].arg1.entry = 1;
-            quadTable[count].arg2.arg.arg_var = tempVarEntry;
-            quadTable[count].arg2.entry = 0;
-            ST_ENTRY *tempVarEntry1 = newTemp(t);
-            quadTable[count].result.arg.arg_var = tempVarEntry1;
-            quadTable[count].result.entry = 0;
-            root->temp_variable_entry = tempVarEntry1; //use this temp variable in case of array access
-            count++;
-        }
+        //     //A(base) + temp
+        //     strcpy(quadTable[count].op,"PLUS");
+        //     quadTable[count].arg1.arg.arg_num = base;
+        //     quadTable[count].arg1.entry = 1;
+        //     quadTable[count].arg2.arg.arg_var = tempVarEntry;
+        //     quadTable[count].arg2.entry = 0;
+        //     ST_ENTRY *tempVarEntry1 = newTemp(t);
+        //     quadTable[count].result.arg.arg_var = tempVarEntry1;
+        //     quadTable[count].result.entry = 0;
+        //     root->temp_variable_entry = tempVarEntry1; //use this temp variable in case of array access
+        //     count++;
+        // }
 
         else if (!strcmp(root->value, "PLUS") || !strcmp(root->value, "MINUS") || !strcmp(root->value, "MUL") || !strcmp(root->value, "DIV"))
         {
@@ -1115,7 +1145,7 @@ void IRcodegenerate(struct treeNode *root)
         {
             // if (root->constructLabel == NULL)
             //     root->constructLabel = newlabel(); // label for the expression
-            if (root->isChildOfAssign)
+            if (root->isChildOfAssign == 1)
             {
                 //printf("operator\n");
                 operator_appears(root);
@@ -1186,12 +1216,21 @@ void IRcodegenerate(struct treeNode *root)
             {
                 int low_index = root->children->symbol_table_entry->type.arr_type.lowRange.start;
                 int high_index = root->children->symbol_table_entry->type.arr_type.highRange.end; 
+                int width;
+                if(!strcasecmp(root->children->symbol_table_entry->type.arr_type.arr_dt,"INTEGER"))
+                    width = 2;
+                else if(!strcasecmp(root->children->symbol_table_entry->type.arr_type.arr_dt,"REAL"))
+                    width = 4;
+                else{
+                    width = 1;
+                }
                 for(int i = low_index; i <= high_index; i++)
                 {
-                    ST_ENTRY* offset_entry = get_offset_for_array(root,i,low_index); //storing offset in a temp variable here
-                    quadTable[count].result.arg.arg_var =  offset_entry;
+                    // ST_ENTRY* offset_entry = get_offset_for_array(root,i,low_index); //storing offset in a temp variable here
+                    // quadTable[count].result.arg.arg_var =  offset_entry;
+                    quadTable[count].result.arg.arg_num = (i-low_index)*width;
                     strcpy(quadTable[count].op, "GET");
-                    quadTable[count].result.entry = 0;            
+                    quadTable[count].result.entry = 1;            
                     quadTable[count].arg2.arg.arg_var = NULL;
                     quadTable[count].arg2.entry = 0;
                     quadTable[count].arg1.arg.arg_var = root->children->symbol_table_entry;  //arg1 stores the variable in which input is to be read
@@ -1224,11 +1263,20 @@ void IRcodegenerate(struct treeNode *root)
             {
                 int low_index = root->children->symbol_table_entry->type.arr_type.lowRange.start;
                 int high_index = root->children->symbol_table_entry->type.arr_type.highRange.end; 
+                int width;
+                if(!strcasecmp(root->children->symbol_table_entry->type.arr_type.arr_dt,"INTEGER"))
+                    width = 2;
+                else if(!strcasecmp(root->children->symbol_table_entry->type.arr_type.arr_dt,"REAL"))
+                    width = 4;
+                else{
+                    width = 1;
+                }
                 for(int i = low_index; i <= high_index; i++)
                 {
-                    ST_ENTRY* offset_entry = get_offset_for_array(root,i,low_index); //storing offset of variable in a temp entry
-                    quadTable[count].result.arg.arg_var = offset_entry;
-                    quadTable[count].result.entry = 0;   
+                    // ST_ENTRY* offset_entry = get_offset_for_array(root,i,low_index); //storing offset of variable in a temp entry
+                    // quadTable[count].result.arg.arg_var = offset_entry;
+                    quadTable[count].result.arg.arg_num = (i-low_index)*width;
+                    quadTable[count].result.entry = 1;   
                     strcpy(quadTable[count].op, "PRINT");         
                     quadTable[count].arg2.arg.arg_var = NULL;
                     quadTable[count].arg2.entry = 0;

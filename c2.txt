@@ -8,12 +8,12 @@ start
 	declare a, b, c:integer;
 	declare u, v: boolean;
 	u:= true;
-	a:= x;
-	b:= v;
+	a:= 5;
+	b:= 9;
 	get_value(x);
 	get_value(y);
-	z:= x + y*b +(a-b)*y+ a*x - b*x;
-	v:= z > u OR a<=b AND x<y AND u;	**follows left to right associativity**
+	z:= x + y*b +(a-b)*y+ a*2 - b*x;
+	v:= z > 10 OR a<=b AND x<y AND u;	**follows left to right associativity**
         print(z);
 	print(v);
 end
@@ -33,6 +33,12 @@ Then print v as true (use string true or false to print output of a variable of 
 Similarly run the generated assembly code for other input values and verify.
 
 **
+
+
+
+
+
+
 
 
 
